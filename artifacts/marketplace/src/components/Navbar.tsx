@@ -177,7 +177,7 @@ export function Navbar() {
                       className="w-full px-3 py-2.5 text-sm text-primary font-medium hover:bg-muted/50 transition-colors border-t flex items-center gap-2"
                     >
                       <Search className="h-3.5 w-3.5" />
-                      {t("nav.search_placeholder").replace("...", "")} "{debouncedSearch}"
+                      {t("nav.search_for", { query: debouncedSearch })}
                     </button>
                   )}
                 </div>

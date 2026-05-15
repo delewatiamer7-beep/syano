@@ -10,18 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect } from "react";
-
-const productSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().min(10, "Description is required"),
-  price: z.coerce.number().min(0.01, "Price must be greater than 0"),
-  category: z.string().min(2, "Category is required"),
-  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-});
-
-type ProductFormValues = z.infer<typeof productSchema>;
+import { useTranslation } from "react-i18next";
 
 export default function EditProduct() {
   const params = useParams();
@@ -29,6 +20,18 @@ export default function EditProduct() {
   const [_, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
+
+  const productSchema = z.object({
+    name: z.string().min(2, t("seller_products.name_min")),
+    description: z.string().min(10, t("seller_products.desc_min")),
+    price: z.coerce.number().min(0.01, t("seller_products.price_min")),
+    category: z.string().min(2, t("seller_products.category_min")),
+    imageUrl: z.string().url(t("seller_products.url_invalid")).optional().or(z.literal("")),
+  });
+
+  type ProductFormValues = z.infer<typeof productSchema>;
 
   const { data: product, isLoading } = useGetProduct(id, {
     query: {
@@ -63,14 +66,14 @@ export default function EditProduct() {
   const updateProduct = useUpdateProduct({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Product updated successfully!" });
+        toast({ title: t("seller_products.updated") });
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetProductQueryKey(id) });
         setLocation("/seller/products");
       },
       onError: (error: any) => {
         toast({
-          title: "Failed to update product",
+          title: t("seller_products.update_failed"),
           description: error.message,
           variant: "destructive",
         });
@@ -83,19 +86,21 @@ export default function EditProduct() {
     updateProduct.mutate({ id, data: payload });
   };
 
+  const BackIcon = isRtl ? ChevronRight : ChevronLeft;
+
   if (isLoading) {
-    return <Layout><div className="container py-12">Loading...</div></Layout>;
+    return <Layout><div className="container py-12 text-muted-foreground">{t("common.loading")}</div></Layout>;
   }
 
   return (
     <Layout>
       <div className="container py-8 max-w-2xl">
         <Link href="/seller/products" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Back to products
+          <BackIcon className="h-4 w-4 me-1" />
+          {t("seller_products.back")}
         </Link>
 
-        <h1 className="text-3xl font-bold tracking-tight mb-8">Edit Product</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-8">{t("seller_products.edit_title")}</h1>
 
         <div className="bg-card border rounded-xl p-6 shadow-sm">
           <Form {...form}>
@@ -105,7 +110,7 @@ export default function EditProduct() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Name</FormLabel>
+                    <FormLabel>{t("seller_products.product_name")}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -120,7 +125,7 @@ export default function EditProduct() {
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price ($)</FormLabel>
+                      <FormLabel>{t("seller_products.price_label")}</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" min="0" {...field} />
                       </FormControl>
@@ -128,11 +133,12 @@ export default function EditProduct() {
                     </FormItem>
                   )}
                 />
-                
+
                 <div className="space-y-2">
-                  <FormLabel className="text-muted-foreground">Stock</FormLabel>
-                  <div className="h-10 px-3 py-2 border rounded-md bg-muted/30 text-muted-foreground flex items-center">
-                    {product?.stock} (Manage in Inventory)
+                  <FormLabel className="text-muted-foreground">{t("seller_products.stock_col")}</FormLabel>
+                  <div className="h-10 px-3 py-2 border rounded-md bg-muted/30 text-muted-foreground flex items-center gap-2">
+                    <span className="font-medium text-foreground">{product?.stock}</span>
+                    <span className="text-xs">{t("seller_products.stock_managed")}</span>
                   </div>
                 </div>
               </div>
@@ -142,7 +148,7 @@ export default function EditProduct() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>{t("seller_products.category")}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -156,7 +162,7 @@ export default function EditProduct() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>{t("seller_products.description")}</FormLabel>
                     <FormControl>
                       <Textarea className="min-h-[120px]" {...field} />
                     </FormControl>
@@ -170,7 +176,7 @@ export default function EditProduct() {
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL (Optional)</FormLabel>
+                    <FormLabel>{t("seller_products.image_url")}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -181,10 +187,10 @@ export default function EditProduct() {
 
               <div className="flex justify-end pt-4 border-t gap-4">
                 <Link href="/seller/products">
-                  <Button variant="outline" type="button">Cancel</Button>
+                  <Button variant="outline" type="button">{t("seller_products.cancel_btn")}</Button>
                 </Link>
                 <Button type="submit" disabled={updateProduct.isPending}>
-                  {updateProduct.isPending ? "Saving..." : "Save Changes"}
+                  {updateProduct.isPending ? t("seller_products.saving") : t("seller_products.save_btn")}
                 </Button>
               </div>
             </form>

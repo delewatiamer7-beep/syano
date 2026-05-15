@@ -10,23 +10,26 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft } from "lucide-react";
-
-const productSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().min(10, "Description is required"),
-  price: z.coerce.number().min(0.01, "Price must be greater than 0"),
-  category: z.string().min(2, "Category is required"),
-  stock: z.coerce.number().int().min(0, "Stock cannot be negative"),
-  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-});
-
-type ProductFormValues = z.infer<typeof productSchema>;
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function NewProduct() {
   const [_, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
+
+  const productSchema = z.object({
+    name: z.string().min(2, t("seller_products.name_min")),
+    description: z.string().min(10, t("seller_products.desc_min")),
+    price: z.coerce.number().min(0.01, t("seller_products.price_min")),
+    category: z.string().min(2, t("seller_products.category_min")),
+    stock: z.coerce.number().int().min(0),
+    imageUrl: z.string().url(t("seller_products.url_invalid")).optional().or(z.literal("")),
+  });
+
+  type ProductFormValues = z.infer<typeof productSchema>;
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -43,13 +46,13 @@ export default function NewProduct() {
   const createProduct = useCreateProduct({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Product created successfully!" });
+        toast({ title: t("seller_products.created") });
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
         setLocation("/seller/products");
       },
       onError: (error: any) => {
         toast({
-          title: "Failed to create product",
+          title: t("seller_products.create_failed"),
           description: error.message,
           variant: "destructive",
         });
@@ -58,20 +61,21 @@ export default function NewProduct() {
   });
 
   const onSubmit = (data: ProductFormValues) => {
-    // Convert empty string to null/undefined
     const payload = { ...data, imageUrl: data.imageUrl || null };
     createProduct.mutate({ data: payload });
   };
+
+  const BackIcon = isRtl ? ChevronRight : ChevronLeft;
 
   return (
     <Layout>
       <div className="container py-8 max-w-2xl">
         <Link href="/seller/products" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Back to products
+          <BackIcon className="h-4 w-4 me-1" />
+          {t("seller_products.back")}
         </Link>
 
-        <h1 className="text-3xl font-bold tracking-tight mb-8">Add New Product</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-8">{t("seller_products.new_title")}</h1>
 
         <div className="bg-card border rounded-xl p-6 shadow-sm">
           <Form {...form}>
@@ -81,9 +85,9 @@ export default function NewProduct() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Name</FormLabel>
+                    <FormLabel>{t("seller_products.product_name")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Minimalist Ceramic Vase" {...field} />
+                      <Input placeholder={t("seller_products.product_name_placeholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -96,7 +100,7 @@ export default function NewProduct() {
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price ($)</FormLabel>
+                      <FormLabel>{t("seller_products.price_label")}</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" min="0" placeholder="29.99" {...field} />
                       </FormControl>
@@ -110,7 +114,7 @@ export default function NewProduct() {
                   name="stock"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Initial Stock</FormLabel>
+                      <FormLabel>{t("seller_products.initial_stock")}</FormLabel>
                       <FormControl>
                         <Input type="number" step="1" min="0" placeholder="10" {...field} />
                       </FormControl>
@@ -125,9 +129,9 @@ export default function NewProduct() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>{t("seller_products.category")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Home Decor" {...field} />
+                      <Input placeholder={t("seller_products.category_placeholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -139,12 +143,12 @@ export default function NewProduct() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>{t("seller_products.description")}</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Detailed description of your product..." 
+                      <Textarea
+                        placeholder={t("seller_products.description_placeholder")}
                         className="min-h-[120px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -157,9 +161,9 @@ export default function NewProduct() {
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL (Optional)</FormLabel>
+                    <FormLabel>{t("seller_products.image_url")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
+                      <Input placeholder={t("seller_products.image_url_placeholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -168,10 +172,10 @@ export default function NewProduct() {
 
               <div className="flex justify-end pt-4 border-t gap-4">
                 <Link href="/seller/products">
-                  <Button variant="outline" type="button">Cancel</Button>
+                  <Button variant="outline" type="button">{t("seller_products.cancel_btn")}</Button>
                 </Link>
                 <Button type="submit" disabled={createProduct.isPending}>
-                  {createProduct.isPending ? "Creating..." : "Create Product"}
+                  {createProduct.isPending ? t("seller_products.creating") : t("seller_products.create_btn")}
                 </Button>
               </div>
             </form>

@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 
 export default function Products() {
   const { t } = useTranslation();
-  const { currency } = useCurrency();
+  const { currency, symbol } = useCurrency();
   const searchParams = new URLSearchParams(window.location.search);
   const initialCategory = searchParams.get("category") || undefined;
   const initialSearch = searchParams.get("search") || "";
@@ -65,8 +65,8 @@ export default function Products() {
 
   const hasActiveFilters = search || (category && category !== "all") || sortBy !== "newest" || minPriceInput || maxPriceInput || hasDiscount;
 
-  const priceLabel = currency === "SYP" ? t("products.min_price").replace("($)", "(ل.س)") : t("products.min_price");
-  const maxPriceLabel = currency === "SYP" ? t("products.max_price").replace("($)", "(ل.س)") : t("products.max_price");
+  const priceLabel = `${t("products.min_price")} (${symbol})`;
+  const maxPriceLabel = `${t("products.max_price")} (${symbol})`;
 
   return (
     <Layout>
