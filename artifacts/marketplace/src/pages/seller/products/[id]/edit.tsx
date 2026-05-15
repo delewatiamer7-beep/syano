@@ -14,6 +14,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
+const productSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  price: z.coerce.number().min(0.01, "Price must be greater than 0"),
+  category: z.string().min(2, "Category is required"),
+  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+});
+
+type ProductFormValues = z.infer<typeof productSchema>;
+
 export default function EditProduct() {
   const params = useParams();
   const id = parseInt(params.id || "0", 10);
@@ -22,16 +32,6 @@ export default function EditProduct() {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === "ar";
-
-  const productSchema = z.object({
-    name: z.string().min(2, t("seller_products.name_min")),
-    description: z.string().min(10, t("seller_products.desc_min")),
-    price: z.coerce.number().min(0.01, t("seller_products.price_min")),
-    category: z.string().min(2, t("seller_products.category_min")),
-    imageUrl: z.string().url(t("seller_products.url_invalid")).optional().or(z.literal("")),
-  });
-
-  type ProductFormValues = z.infer<typeof productSchema>;
 
   const { data: product, isLoading } = useGetProduct(id, {
     query: {
@@ -94,15 +94,15 @@ export default function EditProduct() {
 
   return (
     <Layout>
-      <div className="container py-8 md:py-12 max-w-2xl">
-        <Link href="/seller/products" className="inline-flex items-center gap-0.5 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
-          <BackIcon className="h-4 w-4" />
+      <div className="container py-8 max-w-2xl">
+        <Link href="/seller/products" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+          <BackIcon className="h-4 w-4 me-1" />
           {t("seller_products.back")}
         </Link>
 
         <h1 className="text-3xl font-bold tracking-tight mb-8">{t("seller_products.edit_title")}</h1>
 
-        <div className="bg-card border rounded-xl p-6 md:p-8 shadow-sm">
+        <div className="bg-card border rounded-xl p-6 shadow-sm">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -119,7 +119,7 @@ export default function EditProduct() {
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="price"
@@ -135,9 +135,11 @@ export default function EditProduct() {
                 />
 
                 <div className="space-y-2">
-                  <FormLabel className="text-muted-foreground">{t("seller_products.stock_col")}</FormLabel>
+                  <p className="text-sm font-medium leading-none text-muted-foreground">
+                    {t("seller_products.stock_col")}
+                  </p>
                   <div className="h-10 px-3 py-2 border rounded-md bg-muted/30 text-muted-foreground flex items-center gap-2">
-                    <span className="font-semibold text-foreground">{product?.stock}</span>
+                    <span className="font-medium text-foreground">{product?.stock}</span>
                     <span className="text-xs">{t("seller_products.stock_managed")}</span>
                   </div>
                 </div>
@@ -164,7 +166,7 @@ export default function EditProduct() {
                   <FormItem>
                     <FormLabel>{t("seller_products.description")}</FormLabel>
                     <FormControl>
-                      <Textarea className="min-h-[120px] leading-relaxed" {...field} />
+                      <Textarea className="min-h-[120px]" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -185,7 +187,7 @@ export default function EditProduct() {
                 )}
               />
 
-              <div className="flex justify-end pt-5 border-t gap-3">
+              <div className="flex justify-end pt-4 border-t gap-4">
                 <Link href="/seller/products">
                   <Button variant="outline" type="button">{t("seller_products.cancel_btn")}</Button>
                 </Link>
