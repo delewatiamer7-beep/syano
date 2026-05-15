@@ -238,7 +238,11 @@ router.delete("/admin/products/:id", async (req, res): Promise<void> => {
   const [existing] = await db.select({ id: productsTable.id }).from(productsTable).where(eq(productsTable.id, id));
   if (!existing) { res.status(404).json({ error: "Product not found" }); return; }
 
-  await db.delete(productsTable).where(eq(productsTable.id, id));
+  await db.transaction(async (tx) => {
+    // Remove all cart references to this product first (FK constraint)
+    await tx.delete(cartItemsTable).where(eq(cartItemsTable.productId, id));
+    await tx.delete(productsTable).where(eq(productsTable.id, id));
+  });
   res.json({ message: "Product deleted" });
 });
 
