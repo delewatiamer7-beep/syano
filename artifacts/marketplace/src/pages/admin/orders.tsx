@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { ShoppingCart, Search } from "lucide-react";
+import { ShoppingCart, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
@@ -21,6 +21,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"];
+const PAGE_SIZE = 20;
 
 export default function AdminOrders() {
   const { t } = useTranslation();
@@ -29,11 +30,16 @@ export default function AdminOrders() {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
 
-  const { data: orders = [], isLoading } = useQuery({
-    queryKey: ["admin", "orders"],
-    queryFn: () => adminApi.getOrders(),
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "orders", page],
+    queryFn: () => adminApi.getOrders(page, PAGE_SIZE),
   });
+
+  const orders = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
 
   const updateStatus = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
@@ -43,11 +49,12 @@ export default function AdminOrders() {
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
     },
-    onError: (err: any) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
   });
 
-  const filtered = orders.filter((o) => {
+  const filtered = orders.filter((o: AdminOrder) => {
     const matchesSearch =
+      !search ||
       o.customerName.toLowerCase().includes(search.toLowerCase()) ||
       o.customerEmail.toLowerCase().includes(search.toLowerCase()) ||
       String(o.id).includes(search);
@@ -66,17 +73,21 @@ export default function AdminOrders() {
             <p className="text-muted-foreground mt-1">{t("admin.orders_desc")}</p>
           </div>
           <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
-            {filtered.length} {t("admin.total_count")}
+            {total} {t("admin.total_count")}
           </div>
         </div>
 
-        {/* Filters */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input className="ps-9" placeholder={t("admin.search_orders")} value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input
+              className="ps-9"
+              placeholder={t("admin.search_orders")}
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
             <SelectTrigger className="w-44">
               <SelectValue placeholder={t("admin.filter_status")} />
             </SelectTrigger>
@@ -121,9 +132,7 @@ export default function AdminOrders() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{order.items.length}</td>
                     <td className="px-4 py-3 font-semibold">{format(order.total)}</td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(order.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
                       <Select
                         value={order.status}
@@ -147,6 +156,20 @@ export default function AdminOrders() {
               </tbody>
             </table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/20">
+              <span className="text-sm text-muted-foreground">{t("admin.page_of", { page, totalPages })}</span>
+              <div className="flex items-center gap-1">
+                <Button size="icon" variant="ghost" className="h-8 w-8" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </AdminLayout>

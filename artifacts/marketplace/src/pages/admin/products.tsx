@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -16,8 +17,17 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, Search, Package } from "lucide-react";
-import { Label } from "@/components/ui/label";
+import { Pencil, Trash2, Search, Package, ChevronLeft, ChevronRight } from "lucide-react";
+
+const PAGE_SIZE = 20;
+
+interface EditForm {
+  name: string;
+  price: string;
+  stock: string;
+  discountPercent: string;
+  category: string;
+}
 
 export default function AdminProducts() {
   const { t } = useTranslation();
@@ -25,23 +35,29 @@ export default function AdminProducts() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [editTarget, setEditTarget] = useState<AdminProduct | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminProduct | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", price: "", stock: "", discountPercent: "", category: "" });
+  const [editForm, setEditForm] = useState<EditForm>({ name: "", price: "", stock: "", discountPercent: "", category: "" });
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["admin", "products"],
-    queryFn: () => adminApi.getProducts(),
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "products", page],
+    queryFn: () => adminApi.getProducts(page, PAGE_SIZE),
   });
 
+  const products = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
+
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => adminApi.updateProduct(id, data),
+    mutationFn: ({ id, updateData }: { id: number; updateData: Partial<AdminProduct> }) =>
+      adminApi.updateProduct(id, updateData),
     onSuccess: () => {
       toast({ title: t("admin.product_updated") });
       queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
       setEditTarget(null);
     },
-    onError: (err: any) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
@@ -52,7 +68,7 @@ export default function AdminProducts() {
       queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
       setDeleteTarget(null);
     },
-    onError: (err: any) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
   });
 
   const openEdit = (p: AdminProduct) => {
@@ -70,7 +86,7 @@ export default function AdminProducts() {
     if (!editTarget) return;
     updateMutation.mutate({
       id: editTarget.id,
-      data: {
+      updateData: {
         name: editForm.name,
         price: parseFloat(editForm.price),
         stock: parseInt(editForm.stock, 10),
@@ -82,6 +98,7 @@ export default function AdminProducts() {
 
   const filtered = products.filter(
     (p) =>
+      !search ||
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.sellerName.toLowerCase().includes(search.toLowerCase()) ||
       p.category.toLowerCase().includes(search.toLowerCase())
@@ -98,13 +115,18 @@ export default function AdminProducts() {
             <p className="text-muted-foreground mt-1">{t("admin.products_desc")}</p>
           </div>
           <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
-            {filtered.length} {t("admin.total_count")}
+            {total} {t("admin.total_count")}
           </div>
         </div>
 
         <div className="relative mb-4 max-w-sm">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input className="ps-9" placeholder={t("admin.search_products")} value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            className="ps-9"
+            placeholder={t("admin.search_products")}
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
         </div>
 
         <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -143,9 +165,7 @@ export default function AdminProducts() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{p.sellerName}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant="secondary" className="font-normal">{p.category}</Badge>
-                    </td>
+                    <td className="px-4 py-3"><Badge variant="secondary" className="font-normal">{p.category}</Badge></td>
                     <td className="px-4 py-3 font-semibold">
                       {format(p.price)}
                       {p.discountPercent != null && p.discountPercent > 0 && (
@@ -175,15 +195,26 @@ export default function AdminProducts() {
               </tbody>
             </table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/20">
+              <span className="text-sm text-muted-foreground">{t("admin.page_of", { page, totalPages })}</span>
+              <div className="flex items-center gap-1">
+                <Button size="icon" variant="ghost" className="h-8 w-8" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Edit Dialog */}
       <Dialog open={!!editTarget} onOpenChange={() => setEditTarget(null)}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("admin.edit_product")}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>{t("admin.edit_product")}</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label>{t("seller_products.product_name")}</Label>
@@ -219,7 +250,6 @@ export default function AdminProducts() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

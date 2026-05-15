@@ -5,14 +5,13 @@ import { adminApi, type AdminUser } from "@/lib/adminApi";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Search, Users } from "lucide-react";
+import { Trash2, Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
 
 const ROLE_COLORS: Record<string, string> = {
   customer: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800",
@@ -20,17 +19,24 @@ const ROLE_COLORS: Record<string, string> = {
   admin: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
 };
 
+const PAGE_SIZE = 20;
+
 export default function AdminUsers() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
 
-  const { data: users = [], isLoading } = useQuery({
-    queryKey: ["admin", "users"],
-    queryFn: () => adminApi.getUsers(),
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "users", page],
+    queryFn: () => adminApi.getUsers(page, PAGE_SIZE),
   });
+
+  const users = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => adminApi.deleteUser(id),
@@ -40,7 +46,7 @@ export default function AdminUsers() {
       queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
       setDeleteTarget(null);
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast({ title: t("common.error"), description: err.message, variant: "destructive" });
       setDeleteTarget(null);
     },
@@ -48,6 +54,7 @@ export default function AdminUsers() {
 
   const filtered = users.filter(
     (u) =>
+      !search ||
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase()) ||
       u.role.toLowerCase().includes(search.toLowerCase())
@@ -64,22 +71,20 @@ export default function AdminUsers() {
             <p className="text-muted-foreground mt-1">{t("admin.users_desc")}</p>
           </div>
           <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
-            {filtered.length} {t("admin.total_count")}
+            {total} {t("admin.total_count")}
           </div>
         </div>
 
-        {/* Search */}
         <div className="relative mb-4 max-w-sm">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             className="ps-9"
             placeholder={t("admin.search_users")}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
         </div>
 
-        {/* Table */}
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -93,17 +98,13 @@ export default function AdminUsers() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {isLoading && (
-                  Array.from({ length: 6 }).map((_, i) => (
-                    <tr key={i}>
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <td key={j} className="px-4 py-3">
-                          <div className="h-4 bg-muted animate-pulse rounded" />
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                )}
+                {isLoading && Array.from({ length: 8 }).map((_, i) => (
+                  <tr key={i}>
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <td key={j} className="px-4 py-3"><div className="h-4 bg-muted animate-pulse rounded" /></td>
+                    ))}
+                  </tr>
+                ))}
                 {!isLoading && filtered.map((user) => (
                   <tr key={user.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3">
@@ -120,13 +121,10 @@ export default function AdminUsers() {
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-end">
                       <Button
-                        size="icon"
-                        variant="ghost"
+                        size="icon" variant="ghost"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={() => setDeleteTarget(user)}
                         disabled={user.role === "admin"}
@@ -137,13 +135,28 @@ export default function AdminUsers() {
                   </tr>
                 ))}
                 {!isLoading && !filtered.length && (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">{t("admin.no_results")}</td>
-                  </tr>
+                  <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">{t("admin.no_results")}</td></tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/20">
+              <span className="text-sm text-muted-foreground">
+                {t("admin.page_of", { page, totalPages })}
+              </span>
+              <div className="flex items-center gap-1">
+                <Button size="icon" variant="ghost" className="h-8 w-8" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -151,9 +164,7 @@ export default function AdminUsers() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("admin.delete_user_title")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("admin.delete_user_desc", { name: deleteTarget?.name })}
-            </AlertDialogDescription>
+            <AlertDialogDescription>{t("admin.delete_user_desc", { name: deleteTarget?.name })}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("seller_products.cancel")}</AlertDialogCancel>

@@ -355,6 +355,7 @@
     "no_data": "No data yet",
     "no_results": "No results found",
     "total_count": "total",
+    "page_of": "Page {{page}} of {{totalPages}}",
     "col_order": "Order",
     "col_customer": "Customer",
     "col_total": "Total",

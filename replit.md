@@ -9,6 +9,7 @@ A full-stack marketplace/ecommerce app with role-based auth (Seller/Customer), c
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- `pnpm --filter @workspace/scripts run seed:admin` — seed admin demo account (idempotent)
 - Required env: `DATABASE_URL` — Postgres connection string, `SESSION_SECRET` — JWT signing secret
 
 ## Stack

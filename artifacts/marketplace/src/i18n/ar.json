@@ -355,6 +355,7 @@
     "no_data": "لا توجد بيانات بعد",
     "no_results": "لا توجد نتائج",
     "total_count": "إجمالي",
+    "page_of": "صفحة {{page}} من {{totalPages}}",
     "col_order": "الطلب",
     "col_customer": "العميل",
     "col_total": "الإجمالي",

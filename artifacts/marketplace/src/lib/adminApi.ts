@@ -12,20 +12,31 @@ async function adminFetch<T>(path: string, options: RequestInit = {}): Promise<T
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Request failed" }));
-    throw new Error(err.error ?? "Request failed");
+    throw new Error((err as { error?: string }).error ?? "Request failed");
   }
   return res.json() as Promise<T>;
 }
 
+export interface Paginated<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export const adminApi = {
   getStats: () => adminFetch<AdminStats>("/admin/stats"),
-  getUsers: () => adminFetch<AdminUser[]>("/admin/users"),
+  getUsers: (page = 1, limit = 20) =>
+    adminFetch<Paginated<AdminUser>>(`/admin/users?page=${page}&limit=${limit}`),
   deleteUser: (id: number) => adminFetch<{ message: string }>(`/admin/users/${id}`, { method: "DELETE" }),
-  getProducts: () => adminFetch<AdminProduct[]>("/admin/products"),
+  getProducts: (page = 1, limit = 20) =>
+    adminFetch<Paginated<AdminProduct>>(`/admin/products?page=${page}&limit=${limit}`),
   updateProduct: (id: number, data: Partial<AdminProductUpdate>) =>
     adminFetch<AdminProduct>(`/admin/products/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteProduct: (id: number) => adminFetch<{ message: string }>(`/admin/products/${id}`, { method: "DELETE" }),
-  getOrders: () => adminFetch<AdminOrder[]>("/admin/orders"),
+  getOrders: (page = 1, limit = 20) =>
+    adminFetch<Paginated<AdminOrder>>(`/admin/orders?page=${page}&limit=${limit}`),
   updateOrderStatus: (id: number, status: string) =>
     adminFetch<{ message: string }>(`/admin/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
   getSettings: () => adminFetch<{ exchangeRate: number }>("/admin/settings"),
