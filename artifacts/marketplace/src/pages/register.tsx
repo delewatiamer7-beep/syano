@@ -11,11 +11,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Layout } from "@/components/Layout";
 import { Store, UserCircle2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(8),
   role: z.enum(["customer", "seller"]),
 });
 
@@ -25,28 +26,24 @@ export default function Register() {
   const [_, setLocation] = useLocation();
   const { login: setAuth } = useAuth();
   const { toast } = useToast();
-  
+  const { t } = useTranslation();
+
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      role: "customer",
-    },
+    defaultValues: { name: "", email: "", password: "", role: "customer" },
   });
 
   const registerMutation = useRegister({
     mutation: {
       onSuccess: (data) => {
         setAuth(data);
-        toast({ title: "Account created successfully!" });
+        toast({ title: t("auth.account_created") });
         setLocation(data.user.role === "seller" ? "/seller/dashboard" : "/");
       },
       onError: (error: any) => {
         toast({
-          title: "Registration failed",
-          description: error.message || "Please try again",
+          title: t("auth.reg_failed"),
+          description: error.message || t("auth.try_again"),
           variant: "destructive",
         });
       },
@@ -62,8 +59,8 @@ export default function Register() {
       <div className="container flex-1 flex items-center justify-center max-w-lg mx-auto py-12">
         <div className="w-full bg-card border border-border p-8 rounded-xl shadow-sm">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground">Create an account</h1>
-            <p className="text-muted-foreground mt-2">Join our marketplace today</p>
+            <h1 className="text-3xl font-bold text-foreground">{t("auth.create_account")}</h1>
+            <p className="text-muted-foreground mt-2">{t("auth.register_subtitle")}</p>
           </div>
 
           <Form {...form}>
@@ -73,7 +70,7 @@ export default function Register() {
                 name="role"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
-                    <FormLabel>I want to...</FormLabel>
+                    <FormLabel>{t("auth.i_want_to")}</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
@@ -86,7 +83,7 @@ export default function Register() {
                           </FormControl>
                           <FormLabel className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer">
                             <UserCircle2 className="mb-2 h-6 w-6" />
-                            Buy products
+                            {t("auth.buy_products")}
                           </FormLabel>
                         </FormItem>
                         <FormItem>
@@ -95,7 +92,7 @@ export default function Register() {
                           </FormControl>
                           <FormLabel className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer">
                             <Store className="mb-2 h-6 w-6" />
-                            Sell products
+                            {t("auth.sell_products")}
                           </FormLabel>
                         </FormItem>
                       </RadioGroup>
@@ -111,9 +108,9 @@ export default function Register() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>{t("auth.full_name")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input placeholder={t("auth.name_placeholder")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -125,9 +122,9 @@ export default function Register() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t("auth.email")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="you@example.com" {...field} />
+                        <Input placeholder={t("auth.email_placeholder")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -139,7 +136,7 @@ export default function Register() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t("auth.password")}</FormLabel>
                       <FormControl>
                         <Input type="password" placeholder="••••••••" {...field} />
                       </FormControl>
@@ -150,15 +147,15 @@ export default function Register() {
               </div>
 
               <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
-                {registerMutation.isPending ? "Creating account..." : "Create account"}
+                {registerMutation.isPending ? t("auth.creating") : t("auth.create_btn")}
               </Button>
             </form>
           </Form>
 
           <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Already have an account? </span>
+            <span className="text-muted-foreground">{t("auth.have_account")} </span>
             <Link href="/login" className="text-primary hover:underline font-medium">
-              Log in
+              {t("auth.login_link")}
             </Link>
           </div>
         </div>

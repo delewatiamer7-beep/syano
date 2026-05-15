@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useLocation } from "wouter";
-import { 
-  useGetCart, 
-  useRemoveFromCart, 
+import {
+  useGetCart,
+  useRemoveFromCart,
   useUpdateCartItem,
   getGetCartQueryKey
 } from "@workspace/api-client-react";
@@ -10,15 +10,17 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 export default function Cart() {
   const [_, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  
+  const { t } = useTranslation();
+  const { format } = useCurrency();
+
   const { data: cart, isLoading } = useGetCart({
-    query: {
-      queryKey: getGetCartQueryKey()
-    }
+    query: { queryKey: getGetCartQueryKey() }
   });
 
   const updateItem = useUpdateCartItem({
@@ -35,11 +37,11 @@ export default function Cart() {
 
   const handleUpdateQuantity = (productId: number, quantity: number) => {
     if (quantity < 1) return;
-    updateItem.mutate({ id: productId, data: { quantity } });
+    updateItem.mutate({ productId, data: { quantity } });
   };
 
   const handleRemove = (productId: number) => {
-    removeItem.mutate({ id: productId });
+    removeItem.mutate({ productId });
   };
 
   if (isLoading) {
@@ -65,21 +67,17 @@ export default function Cart() {
   return (
     <Layout>
       <div className="container py-8 md:py-12 max-w-6xl">
-        <h1 className="text-3xl font-bold tracking-tight mb-8">Shopping Cart</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-8">{t("cart.title")}</h1>
 
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center py-20 text-center bg-muted/20 rounded-2xl border border-dashed">
             <div className="h-20 w-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
               <ShoppingBag className="h-10 w-10 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
-            <p className="text-muted-foreground mb-8 max-w-md">
-              Looks like you haven't added anything to your cart yet. Discover our premium selection.
-            </p>
+            <h2 className="text-2xl font-bold mb-2">{t("cart.empty")}</h2>
+            <p className="text-muted-foreground mb-8 max-w-md">{t("cart.empty_desc")}</p>
             <Link href="/products">
-              <Button size="lg" className="h-12 px-8">
-                Start Shopping
-              </Button>
+              <Button size="lg" className="h-12 px-8">{t("cart.start_shopping")}</Button>
             </Link>
           </div>
         ) : (
@@ -94,34 +92,38 @@ export default function Cart() {
                           {item.product.imageUrl ? (
                             <img src={item.product.imageUrl} alt={item.product.name} className="h-full w-full object-cover" />
                           ) : (
-                            <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
+                            <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
+                              {t("cart.no_image")}
+                            </div>
                           )}
                         </div>
                       </Link>
-                      
+
                       <div className="flex-1 flex flex-col justify-between">
                         <div className="flex justify-between gap-4">
                           <div>
                             <Link href={`/products/${item.productId}`}>
                               <h3 className="font-semibold text-lg hover:text-primary transition-colors line-clamp-1">{item.product.name}</h3>
                             </Link>
-                            <p className="text-sm text-muted-foreground">Sold by {item.product.sellerName}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {t("cart.sold_by")} {item.product.sellerName}
+                            </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right shrink-0">
                             {item.product.discountPercent && item.product.discountPercent > 0 ? (
                               <>
-                                <div className="font-bold text-lg">${item.product.finalPrice.toFixed(2)}</div>
-                                <div className="text-sm text-muted-foreground line-through">${item.product.price.toFixed(2)}</div>
+                                <div className="font-bold text-lg">{format(item.product.finalPrice)}</div>
+                                <div className="text-sm text-muted-foreground line-through">{format(item.product.price)}</div>
                               </>
                             ) : (
-                              <div className="font-bold text-lg">${item.product.price.toFixed(2)}</div>
+                              <div className="font-bold text-lg">{format(item.product.price)}</div>
                             )}
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between mt-4">
                           <div className="flex items-center border rounded-md h-9">
-                            <button 
+                            <button
                               className="px-3 hover:bg-muted/50 h-full text-muted-foreground hover:text-foreground transition-colors"
                               onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
                               disabled={updateItem.isPending}
@@ -129,7 +131,7 @@ export default function Cart() {
                               <Minus className="h-3 w-3" />
                             </button>
                             <span className="px-2 font-medium text-sm w-8 text-center">{item.quantity}</span>
-                            <button 
+                            <button
                               className="px-3 hover:bg-muted/50 h-full text-muted-foreground hover:text-foreground transition-colors"
                               onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
                               disabled={updateItem.isPending || item.quantity >= item.product.stock}
@@ -137,16 +139,16 @@ export default function Cart() {
                               <Plus className="h-3 w-3" />
                             </button>
                           </div>
-                          
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             onClick={() => handleRemove(item.productId)}
                             disabled={removeItem.isPending}
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Remove
+                            <Trash2 className="h-4 w-4 me-2" />
+                            {t("cart.remove")}
                           </Button>
                         </div>
                       </div>
@@ -157,31 +159,31 @@ export default function Cart() {
             </div>
 
             <div className="w-full lg:w-96 bg-card border rounded-xl p-6 shadow-sm sticky top-24">
-              <h3 className="text-xl font-bold mb-6">Order Summary</h3>
-              
+              <h3 className="text-xl font-bold mb-6">{t("cart.order_summary")}</h3>
+
               <div className="space-y-4 mb-6 text-sm">
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Subtotal ({cart.itemCount} items)</span>
-                  <span>${cart.total.toFixed(2)}</span>
+                  <span>{t("cart.subtotal", { count: cart.itemCount })}</span>
+                  <span>{format(cart.total)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Shipping</span>
-                  <span>Calculated at checkout</span>
+                  <span>{t("cart.shipping")}</span>
+                  <span>{t("cart.shipping_calc")}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Tax</span>
-                  <span>Calculated at checkout</span>
+                  <span>{t("cart.tax")}</span>
+                  <span>{t("cart.tax_calc")}</span>
                 </div>
                 <div className="border-t pt-4 flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span>${cart.total.toFixed(2)}</span>
+                  <span>{t("cart.total")}</span>
+                  <span>{format(cart.total)}</span>
                 </div>
               </div>
 
               <Link href="/checkout">
                 <Button className="w-full h-12 text-base font-semibold">
-                  Proceed to Checkout
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  {t("cart.checkout")}
+                  <ArrowRight className="ms-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>

@@ -119,6 +119,23 @@ paths:
           in: query
           schema:
             type: ["integer", "null"]
+        - name: minPrice
+          in: query
+          schema:
+            type: ["number", "null"]
+        - name: maxPrice
+          in: query
+          schema:
+            type: ["number", "null"]
+        - name: hasDiscount
+          in: query
+          schema:
+            type: ["boolean", "null"]
+        - name: sortBy
+          in: query
+          schema:
+            type: ["string", "null"]
+            enum: ["newest", "price_asc", "price_desc", null]
       responses:
         "200":
           description: List of products

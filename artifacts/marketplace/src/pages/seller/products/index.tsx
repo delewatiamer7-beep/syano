@@ -30,6 +30,7 @@ export default function SellerProducts() {
     sellerId: user?.id
   }, {
     query: {
+      queryKey: getListProductsQueryKey({ sellerId: user?.id }),
       enabled: !!user?.id
     }
   });

@@ -1,9 +1,11 @@
+import "@/i18n";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { setupApi } from "@/lib/api-setup";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -39,70 +41,45 @@ const queryClient = new QueryClient({
 function Router() {
   return (
     <Switch>
-      {/* Public Routes */}
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/products" component={Products} />
       <Route path="/products/:id" component={ProductDetail} />
 
-      {/* Customer Routes */}
       <Route path="/cart">
-        <ProtectedRoute allowedRoles={["customer"]}>
-          <Cart />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["customer"]}><Cart /></ProtectedRoute>
       </Route>
       <Route path="/checkout">
-        <ProtectedRoute allowedRoles={["customer"]}>
-          <Checkout />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["customer"]}><Checkout /></ProtectedRoute>
       </Route>
       <Route path="/orders">
-        <ProtectedRoute allowedRoles={["customer"]}>
-          <OrderHistory />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["customer"]}><OrderHistory /></ProtectedRoute>
       </Route>
       <Route path="/orders/:id">
-        <ProtectedRoute allowedRoles={["customer"]}>
-          <OrderDetail />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["customer"]}><OrderDetail /></ProtectedRoute>
       </Route>
       <Route path="/customer/dashboard">
-        <ProtectedRoute allowedRoles={["customer"]}>
-          <CustomerDashboard />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["customer"]}><CustomerDashboard /></ProtectedRoute>
       </Route>
 
-      {/* Seller Routes */}
       <Route path="/seller/dashboard">
-        <ProtectedRoute allowedRoles={["seller"]}>
-          <SellerDashboard />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["seller"]}><SellerDashboard /></ProtectedRoute>
       </Route>
       <Route path="/seller/products">
-        <ProtectedRoute allowedRoles={["seller"]}>
-          <SellerProducts />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["seller"]}><SellerProducts /></ProtectedRoute>
       </Route>
       <Route path="/seller/products/new">
-        <ProtectedRoute allowedRoles={["seller"]}>
-          <NewProduct />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["seller"]}><NewProduct /></ProtectedRoute>
       </Route>
       <Route path="/seller/products/:id/edit">
-        <ProtectedRoute allowedRoles={["seller"]}>
-          <EditProduct />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["seller"]}><EditProduct /></ProtectedRoute>
       </Route>
       <Route path="/seller/orders">
-        <ProtectedRoute allowedRoles={["seller"]}>
-          <SellerOrders />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["seller"]}><SellerOrders /></ProtectedRoute>
       </Route>
       <Route path="/seller/inventory">
-        <ProtectedRoute allowedRoles={["seller"]}>
-          <Inventory />
-        </ProtectedRoute>
+        <ProtectedRoute allowedRoles={["seller"]}><Inventory /></ProtectedRoute>
       </Route>
 
       <Route component={NotFound} />
@@ -113,16 +90,18 @@ function Router() {
 function App() {
   return (
     <ThemeProvider defaultTheme="system" attribute="class">
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TooltipProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-            <Toaster />
-          </TooltipProvider>
-        </AuthProvider>
-      </QueryClientProvider>
+      <CurrencyProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <TooltipProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+              <Toaster />
+            </TooltipProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </CurrencyProvider>
     </ThemeProvider>
   );
 }

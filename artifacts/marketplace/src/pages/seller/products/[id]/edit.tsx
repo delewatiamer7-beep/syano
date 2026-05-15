@@ -32,6 +32,7 @@ export default function EditProduct() {
 
   const { data: product, isLoading } = useGetProduct(id, {
     query: {
+      queryKey: getGetProductQueryKey(id),
       enabled: !!id,
     }
   });

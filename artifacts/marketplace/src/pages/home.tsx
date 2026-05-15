@@ -3,10 +3,12 @@ import { Link } from "wouter";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useListProducts, useListCategories } from "@workspace/api-client-react";
-import { ShoppingBag, ArrowRight, Tag } from "lucide-react";
+import { ArrowRight, Tag } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
+  const { t } = useTranslation();
   const { data: products, isLoading: isLoadingProducts } = useListProducts();
   const { data: categories, isLoading: isLoadingCategories } = useListCategories();
 
@@ -15,39 +17,37 @@ export default function Home() {
   return (
     <Layout>
       <div className="w-full">
-        {/* Header Section */}
         <section className="bg-card border-b py-20 px-6 lg:px-8 text-center flex flex-col items-center">
           <div className="max-w-3xl mx-auto space-y-6">
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground">
-              Curated goods for the modern life.
+              {t("home.hero_title")}
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Discover unique, high-quality products from independent creators around the world. Every item is handpicked for its design and craftsmanship.
+              {t("home.hero_desc")}
             </p>
             <div className="pt-4 flex items-center justify-center gap-4">
               <Link href="/products">
                 <Button size="lg" className="h-12 px-8 text-base font-semibold">
-                  Shop All
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  {t("home.shop_all")}
+                  <ArrowRight className="ms-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
           </div>
         </section>
 
-        {/* Categories Section */}
         <section className="py-16 container">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold tracking-tight">Shop by Category</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{t("home.categories_title")}</h2>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {isLoadingCategories ? (
               Array(6).fill(0).map((_, i) => (
                 <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
               ))
             ) : categories?.length === 0 ? (
-              <p className="text-muted-foreground col-span-full">No categories found.</p>
+              <p className="text-muted-foreground col-span-full">{t("home.no_categories")}</p>
             ) : (
               categories?.map((category) => (
                 <Link key={category} href={`/products?category=${encodeURIComponent(category)}`}>
@@ -61,16 +61,15 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Featured Products */}
         <section className="py-16 bg-muted/30 border-t">
           <div className="container">
             <div className="flex items-center justify-between mb-10">
-              <h2 className="text-3xl font-bold tracking-tight">New Arrivals</h2>
+              <h2 className="text-3xl font-bold tracking-tight">{t("home.arrivals_title")}</h2>
               <Link href="/products" className="text-primary hover:underline font-medium flex items-center">
-                View all <ArrowRight className="ml-1 h-4 w-4" />
+                {t("home.view_all")} <ArrowRight className="ms-1 h-4 w-4" />
               </Link>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
               {isLoadingProducts ? (
                 Array(4).fill(0).map((_, i) => (
@@ -82,7 +81,7 @@ export default function Home() {
                 ))
               ) : featuredProducts.length === 0 ? (
                 <div className="col-span-full text-center py-12">
-                  <p className="text-muted-foreground text-lg">No products available right now.</p>
+                  <p className="text-muted-foreground text-lg">{t("home.no_products")}</p>
                 </div>
               ) : (
                 featuredProducts.map((product) => (

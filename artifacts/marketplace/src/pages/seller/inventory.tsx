@@ -7,25 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Check, Save } from "lucide-react";
+import { Package, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 export default function Inventory() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const { format: formatCurrency } = useCurrency();
 
   const [stockValues, setStockValues] = useState<Record<number, number>>({});
   const [discountValues, setDiscountValues] = useState<Record<number, string>>({});
-  
+
   const { data: products, isLoading } = useListProducts({ sellerId: user?.id }, {
-    query: { enabled: !!user?.id }
+    query: { queryKey: getListProductsQueryKey({ sellerId: user?.id }), enabled: !!user?.id }
   });
 
   const updateStock = useUpdateStock({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Stock updated" });
+        toast({ title: t("inventory.stock_updated") });
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
       }
     }
@@ -34,7 +38,7 @@ export default function Inventory() {
   const updateDiscount = useUpdateDiscount({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Discount updated" });
+        toast({ title: t("inventory.discount_updated") });
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
       }
     }
@@ -66,26 +70,26 @@ export default function Inventory() {
   return (
     <Layout>
       <div className="container py-8 max-w-6xl">
-        <h1 className="text-3xl font-bold tracking-tight mb-8">Inventory & Pricing</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-8">{t("inventory.title")}</h1>
 
         <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">Loading inventory...</div>
+            <div className="p-8 text-center text-muted-foreground">{t("inventory.loading")}</div>
           ) : !products || products.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Package className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
-              <h3 className="text-xl font-semibold mb-2">No products</h3>
-              <p className="text-muted-foreground">Add products to manage inventory.</p>
+              <h3 className="text-xl font-semibold mb-2">{t("inventory.no_products")}</h3>
+              <p className="text-muted-foreground">{t("inventory.no_products_desc")}</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="w-[120px]">Base Price</TableHead>
-                  <TableHead className="w-[200px]">Stock Count</TableHead>
-                  <TableHead className="w-[200px]">Discount (%)</TableHead>
-                  <TableHead className="text-right w-[150px]">Final Price</TableHead>
+                  <TableHead>{t("inventory.product")}</TableHead>
+                  <TableHead className="w-[120px]">{t("inventory.base_price")}</TableHead>
+                  <TableHead className="w-[200px]">{t("inventory.stock_count")}</TableHead>
+                  <TableHead className="w-[200px]">{t("inventory.discount")}</TableHead>
+                  <TableHead className="text-right w-[150px]">{t("inventory.final_price")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -94,17 +98,19 @@ export default function Inventory() {
                     <TableCell className="font-medium">
                       {product.name}
                       {product.stock <= 5 && product.stock > 0 && (
-                        <Badge variant="outline" className="ml-2 bg-yellow-100 text-yellow-800 border-yellow-200">Low Stock</Badge>
+                        <Badge variant="outline" className="ms-2 bg-yellow-100 text-yellow-800 border-yellow-200">
+                          {t("inventory.low_stock")}
+                        </Badge>
                       )}
                       {product.stock === 0 && (
-                        <Badge variant="destructive" className="ml-2">Out of Stock</Badge>
+                        <Badge variant="destructive" className="ms-2">{t("inventory.out_of_stock")}</Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">${product.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-muted-foreground">{formatCurrency(product.price)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           min="0"
                           className="w-20 h-8"
                           defaultValue={product.stock}
@@ -119,8 +125,8 @@ export default function Inventory() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           min="0"
                           max="100"
                           className="w-20 h-8"
@@ -128,16 +134,16 @@ export default function Inventory() {
                           defaultValue={product.discountPercent || ""}
                           onChange={(e) => handleDiscountChange(product.id, e.target.value)}
                         />
-                        {discountValues[product.id] !== undefined && 
-                         discountValues[product.id] !== (product.discountPercent?.toString() || "") && (
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => handleSaveDiscount(product.id)}>
-                            <Save className="h-4 w-4" />
-                          </Button>
-                        )}
+                        {discountValues[product.id] !== undefined &&
+                          discountValues[product.id] !== (product.discountPercent?.toString() || "") && (
+                            <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => handleSaveDiscount(product.id)}>
+                              <Save className="h-4 w-4" />
+                            </Button>
+                          )}
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-bold text-lg">
-                      ${product.finalPrice.toFixed(2)}
+                      {formatCurrency(product.finalPrice)}
                     </TableCell>
                   </TableRow>
                 ))}

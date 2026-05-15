@@ -74,7 +74,11 @@ export const GetMeResponse = zod.object({
 export const ListProductsQueryParams = zod.object({
   "category": zod.coerce.string().nullish(),
   "search": zod.coerce.string().nullish(),
-  "sellerId": zod.coerce.number().nullish()
+  "sellerId": zod.coerce.number().nullish(),
+  "minPrice": zod.coerce.number().nullish(),
+  "maxPrice": zod.coerce.number().nullish(),
+  "hasDiscount": zod.coerce.boolean().nullish(),
+  "sortBy": zod.union([zod.literal('newest'),zod.literal('price_asc'),zod.literal('price_desc'),zod.literal(null)]).nullish()
 })
 
 export const ListProductsResponseItem = zod.object({

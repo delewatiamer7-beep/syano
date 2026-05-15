@@ -5,6 +5,7 @@
  * Marketplace API
  * OpenAPI spec version: 0.1.0
  */
+import type { ListProductsSortBy } from './listProductsSortBy';
 
 export type ListProductsParams = {
 /**
@@ -19,4 +20,20 @@ search?: string | null;
  * @nullable
  */
 sellerId?: number | null;
+/**
+ * @nullable
+ */
+minPrice?: number | null;
+/**
+ * @nullable
+ */
+maxPrice?: number | null;
+/**
+ * @nullable
+ */
+hasDiscount?: boolean | null;
+/**
+ * @nullable
+ */
+sortBy?: ListProductsSortBy;
 };

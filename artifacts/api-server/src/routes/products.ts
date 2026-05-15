@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, ilike, and, sql } from "drizzle-orm";
+import { eq, ilike, and, or, sql, gte, lte, isNotNull } from "drizzle-orm";
 import { db, productsTable, usersTable } from "@workspace/db";
 import {
   ListProductsQueryParams,
@@ -53,20 +53,52 @@ router.get("/products", async (req, res): Promise<void> => {
   let query = db.select().from(productsTable).$dynamic();
 
   const conditions = [];
+
   if (params.data.category) {
     conditions.push(eq(productsTable.category, params.data.category));
   }
+
   if (params.data.search) {
-    conditions.push(ilike(productsTable.name, `%${params.data.search}%`));
+    const term = `%${params.data.search}%`;
+    conditions.push(
+      or(
+        ilike(productsTable.name, term),
+        ilike(productsTable.description, term),
+        ilike(productsTable.category, term)
+      )!
+    );
   }
+
   if (params.data.sellerId) {
     conditions.push(eq(productsTable.sellerId, params.data.sellerId));
   }
+
+  if (params.data.minPrice != null) {
+    conditions.push(gte(sql`CAST(${productsTable.price} AS numeric)`, params.data.minPrice));
+  }
+
+  if (params.data.maxPrice != null) {
+    conditions.push(lte(sql`CAST(${productsTable.price} AS numeric)`, params.data.maxPrice));
+  }
+
+  if (params.data.hasDiscount === true) {
+    conditions.push(isNotNull(productsTable.discountPercent));
+  }
+
   if (conditions.length > 0) {
     query = query.where(and(...conditions));
   }
 
-  const products = await query.orderBy(sql`${productsTable.createdAt} desc`);
+  const sortBy = params.data.sortBy;
+  if (sortBy === "price_asc") {
+    query = query.orderBy(sql`CAST(${productsTable.price} AS numeric) asc`);
+  } else if (sortBy === "price_desc") {
+    query = query.orderBy(sql`CAST(${productsTable.price} AS numeric) desc`);
+  } else {
+    query = query.orderBy(sql`${productsTable.createdAt} desc`);
+  }
+
+  const products = await query;
   const result = await Promise.all(products.map(buildProductResponse));
   res.json(result);
 });

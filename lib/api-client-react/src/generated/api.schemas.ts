@@ -217,5 +217,30 @@ search?: string | null;
  * @nullable
  */
 sellerId?: number | null;
+/**
+ * @nullable
+ */
+minPrice?: number | null;
+/**
+ * @nullable
+ */
+maxPrice?: number | null;
+/**
+ * @nullable
+ */
+hasDiscount?: boolean | null;
+/**
+ * @nullable
+ */
+sortBy?: ListProductsSortBy;
 };
+
+export type ListProductsSortBy = typeof ListProductsSortBy[keyof typeof ListProductsSortBy] | null;
+
+
+export const ListProductsSortBy = {
+  newest: 'newest',
+  price_asc: 'price_asc',
+  price_desc: 'price_desc',
+} as const;
 

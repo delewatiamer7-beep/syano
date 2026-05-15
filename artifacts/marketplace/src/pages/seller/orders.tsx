@@ -8,21 +8,25 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Package } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 export default function SellerOrders() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const { format: formatCurrency } = useCurrency();
 
   const { data: orders, isLoading } = useListOrders();
 
   const updateStatus = useUpdateOrderStatus({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Order status updated" });
+        toast({ title: t("seller_orders.updated") });
         queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey() });
       },
       onError: () => {
-        toast({ title: "Failed to update order", variant: "destructive" });
+        toast({ title: t("seller_orders.update_failed"), variant: "destructive" });
       }
     }
   });
@@ -46,28 +50,28 @@ export default function SellerOrders() {
     <Layout>
       <div className="container py-8 max-w-6xl">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Manage Orders</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("seller_orders.title")}</h1>
         </div>
 
         <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">Loading orders...</div>
+            <div className="p-8 text-center text-muted-foreground">{t("seller_orders.loading")}</div>
           ) : !orders || orders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Package className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
-              <h3 className="text-xl font-semibold mb-2">No orders yet</h3>
-              <p className="text-muted-foreground mb-6">When customers place orders, they will appear here.</p>
+              <h3 className="text-xl font-semibold mb-2">{t("seller_orders.no_orders")}</h3>
+              <p className="text-muted-foreground mb-6">{t("seller_orders.no_orders_desc")}</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">Order ID</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Items</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="w-[180px]">Status</TableHead>
+                  <TableHead className="w-[100px]">{t("seller_orders.order_id")}</TableHead>
+                  <TableHead>{t("seller_orders.date")}</TableHead>
+                  <TableHead>{t("seller_orders.customer")}</TableHead>
+                  <TableHead>{t("seller_orders.items")}</TableHead>
+                  <TableHead className="text-right">{t("seller_orders.total")}</TableHead>
+                  <TableHead className="w-[180px]">{t("seller_orders.status")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -82,14 +86,16 @@ export default function SellerOrders() {
                       <div className="text-xs text-muted-foreground">{order.customerEmail}</div>
                     </TableCell>
                     <TableCell>
-                      {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                      {order.items.length === 1
+                        ? t("seller_orders.items_count", { count: order.items.length })
+                        : t("seller_orders.items_count_plural", { count: order.items.length })}
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      ${order.total.toFixed(2)}
+                      {formatCurrency(order.total)}
                     </TableCell>
                     <TableCell>
-                      <Select 
-                        defaultValue={order.status} 
+                      <Select
+                        defaultValue={order.status}
                         onValueChange={(val) => handleStatusChange(order.id, val)}
                         disabled={updateStatus.isPending}
                       >
@@ -97,11 +103,11 @@ export default function SellerOrders() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="processing">Processing</SelectItem>
-                          <SelectItem value="shipped">Shipped</SelectItem>
-                          <SelectItem value="delivered">Delivered</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                          <SelectItem value="pending">{t("seller_orders.pending")}</SelectItem>
+                          <SelectItem value="processing">{t("seller_orders.processing")}</SelectItem>
+                          <SelectItem value="shipped">{t("seller_orders.shipped")}</SelectItem>
+                          <SelectItem value="delivered">{t("seller_orders.delivered")}</SelectItem>
+                          <SelectItem value="cancelled">{t("seller_orders.cancelled")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>

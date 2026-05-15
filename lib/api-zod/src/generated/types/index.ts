@@ -15,6 +15,7 @@ export * from './customerDashboard';
 export * from './discountInput';
 export * from './healthStatus';
 export * from './listProductsParams';
+export * from './listProductsSortBy';
 export * from './loginInput';
 export * from './loginInputRole';
 export * from './messageResponse';
