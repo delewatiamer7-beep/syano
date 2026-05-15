@@ -127,7 +127,14 @@
     "status_cancelled": "Cancelled",
     "address": "Shipping Address",
     "items": "Items",
-    "back": "Back to orders"
+    "back": "Back to orders",
+    "timeline_title": "Order Progress",
+    "step_pending": "Order Placed",
+    "step_processing": "Processing",
+    "step_shipped": "Shipped",
+    "step_delivered": "Delivered",
+    "step_current": "In progress",
+    "step_pending_label": "Upcoming"
   },
   "customer_dashboard": {
     "title": "Customer Dashboard",

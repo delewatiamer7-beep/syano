@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { ChevronLeft, Package, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { OrderStatusTimeline } from "@/components/OrderStatusTimeline";
 
 export default function OrderDetail() {
   const params = useParams();
@@ -58,6 +59,14 @@ export default function OrderDetail() {
             <div className="text-2xl font-bold">{formatCurrency(order.total)}</div>
             <p className="text-sm text-muted-foreground mt-0.5">{order.items.length} {t("orders.items")}</p>
           </div>
+        </div>
+
+        <div className="mb-6">
+          <OrderStatusTimeline
+            status={order.status as "pending" | "processing" | "shipped" | "delivered" | "cancelled"}
+            createdAt={order.createdAt}
+            updatedAt={order.updatedAt}
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

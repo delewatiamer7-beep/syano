@@ -127,7 +127,14 @@
     "status_cancelled": "ملغى",
     "address": "عنوان الشحن",
     "items": "العناصر",
-    "back": "العودة للطلبات"
+    "back": "العودة للطلبات",
+    "timeline_title": "تتبع الطلب",
+    "step_pending": "تم تقديم الطلب",
+    "step_processing": "قيد المعالجة",
+    "step_shipped": "تم الشحن",
+    "step_delivered": "تم التوصيل",
+    "step_current": "جارٍ",
+    "step_pending_label": "قادم"
   },
   "customer_dashboard": {
     "title": "لوحة تحكم العميل",
