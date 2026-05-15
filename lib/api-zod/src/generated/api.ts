@@ -615,6 +615,18 @@ export const AdminGetStatsResponse = zod.object({
 
 
 /**
+ * @summary Get daily revenue and order counts for the last 30 days (admin only)
+ */
+export const AdminGetStatsTimeseriesResponse = zod.object({
+  "data": zod.array(zod.object({
+  "date": zod.string(),
+  "revenue": zod.number(),
+  "orders": zod.number()
+}))
+})
+
+
+/**
  * @summary List all users with pagination (admin only)
  */
 export const AdminListUsersQueryParams = zod.object({

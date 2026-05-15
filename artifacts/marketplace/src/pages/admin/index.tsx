@@ -1,9 +1,20 @@
 import { AdminLayout } from "@/components/AdminLayout";
-import { useAdminGetStats } from "@workspace/api-client-react";
+import { useAdminGetStats, useAdminGetStatsTimeseries } from "@workspace/api-client-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
-import { Users, Package, ShoppingCart, TrendingUp, Clock } from "lucide-react";
+import { Users, Package, ShoppingCart, TrendingUp, Clock, BarChart2 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  Line,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
@@ -13,11 +24,48 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-red-500/10 text-red-600 dark:text-red-400",
 };
 
+function formatShortDate(dateStr: string) {
+  const [, month, day] = dateStr.split("-");
+  return `${parseInt(month)}/${parseInt(day)}`;
+}
+
+interface TooltipPayloadEntry {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  label?: string;
+  payload?: TooltipPayloadEntry[];
+  formatRevenue: (n: number) => string;
+}
+
+function CustomTooltip({ active, label, payload, formatRevenue }: CustomTooltipProps) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-card border border-border rounded-lg p-3 shadow-lg text-sm">
+      <p className="text-muted-foreground mb-2 font-medium">{label}</p>
+      {payload.map((entry) => (
+        <div key={entry.name} className="flex items-center gap-2">
+          <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+          <span className="text-muted-foreground capitalize">{entry.name}:</span>
+          <span className="font-semibold text-foreground">
+            {entry.name === "revenue" ? formatRevenue(entry.value) : entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const { format } = useCurrency();
 
   const { data: stats, isLoading } = useAdminGetStats();
+  const { data: timeseries, isLoading: isTimeseriesLoading } = useAdminGetStatsTimeseries();
 
   const statCards = [
     { label: t("admin.total_users"), value: stats?.totalUsers ?? 0, icon: Users, color: "text-blue-500" },
@@ -25,6 +73,13 @@ export default function AdminDashboard() {
     { label: t("admin.total_orders"), value: stats?.totalOrders ?? 0, icon: ShoppingCart, color: "text-orange-500" },
     { label: t("admin.total_revenue"), value: format(stats?.totalRevenue ?? 0), icon: TrendingUp, color: "text-emerald-500" },
   ];
+
+  const chartData = (timeseries?.data ?? []).map((d) => ({
+    ...d,
+    label: formatShortDate(d.date),
+  }));
+
+  const hasChartData = chartData.some((d) => d.revenue > 0 || d.orders > 0);
 
   return (
     <AdminLayout>
@@ -50,6 +105,83 @@ export default function AdminDashboard() {
               )}
             </div>
           ))}
+        </div>
+
+        {/* Charts */}
+        <div className="bg-card border border-border rounded-xl p-5 mb-6">
+          <h2 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+            <BarChart2 className="h-4 w-4 text-muted-foreground" />
+            Revenue &amp; Orders — Last 30 Days
+          </h2>
+          <p className="text-xs text-muted-foreground mb-5">Daily revenue (bars) and order count (line)</p>
+
+          {isTimeseriesLoading ? (
+            <div className="h-64 bg-muted animate-pulse rounded-lg" />
+          ) : !hasChartData ? (
+            <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">
+              No order data for the last 30 days
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <ComposedChart data={chartData} margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval={4}
+                />
+                <YAxis
+                  yAxisId="revenue"
+                  orientation="left"
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v: number) => {
+                    if (v >= 1000) return `${(v / 1000).toFixed(0)}k`;
+                    return String(v);
+                  }}
+                  width={44}
+                />
+                <YAxis
+                  yAxisId="orders"
+                  orientation="right"
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={false}
+                  width={32}
+                />
+                <Tooltip
+                  content={<CustomTooltip formatRevenue={format} />}
+                  cursor={{ fill: "hsl(var(--muted))", opacity: 0.5 }}
+                />
+                <Legend
+                  wrapperStyle={{ fontSize: 12, color: "hsl(var(--muted-foreground))", paddingTop: 12 }}
+                />
+                <Bar
+                  yAxisId="revenue"
+                  dataKey="revenue"
+                  name="revenue"
+                  fill="hsl(var(--primary))"
+                  radius={[3, 3, 0, 0]}
+                  maxBarSize={28}
+                  opacity={0.85}
+                />
+                <Line
+                  yAxisId="orders"
+                  type="monotone"
+                  dataKey="orders"
+                  name="orders"
+                  stroke="hsl(var(--chart-2, 34 85% 53%))"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4 }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

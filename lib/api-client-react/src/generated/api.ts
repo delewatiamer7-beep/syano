@@ -29,6 +29,7 @@ import type {
   AdminProductUpdate,
   AdminSettings,
   AdminStats,
+  AdminStatsTimeseries,
   AuthResponse,
   Cart,
   CartItemInput,
@@ -2132,6 +2133,83 @@ export function useAdminGetStats<TData = Awaited<ReturnType<typeof adminGetStats
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getAdminGetStatsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAdminGetStatsTimeseriesUrl = () => {
+
+
+
+
+  return `/api/admin/stats/timeseries`
+}
+
+/**
+ * @summary Get daily revenue and order counts for the last 30 days (admin only)
+ */
+export const adminGetStatsTimeseries = async ( options?: RequestInit): Promise<AdminStatsTimeseries> => {
+
+  return customFetch<AdminStatsTimeseries>(getAdminGetStatsTimeseriesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetStatsTimeseriesQueryKey = () => {
+    return [
+    `/api/admin/stats/timeseries`
+    ] as const;
+    }
+
+
+export const getAdminGetStatsTimeseriesQueryOptions = <TData = Awaited<ReturnType<typeof adminGetStatsTimeseries>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetStatsTimeseries>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetStatsTimeseriesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetStatsTimeseries>>> = ({ signal }) => adminGetStatsTimeseries({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetStatsTimeseries>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminGetStatsTimeseriesQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetStatsTimeseries>>>
+export type AdminGetStatsTimeseriesQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get daily revenue and order counts for the last 30 days (admin only)
+ */
+
+export function useAdminGetStatsTimeseries<TData = Awaited<ReturnType<typeof adminGetStatsTimeseries>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetStatsTimeseries>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminGetStatsTimeseriesQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

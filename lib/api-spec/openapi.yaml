@@ -581,6 +581,23 @@ paths:
         "403":
           description: Forbidden
 
+  /admin/stats/timeseries:
+    get:
+      operationId: adminGetStatsTimeseries
+      tags: [admin]
+      summary: Get daily revenue and order counts for the last 30 days (admin only)
+      responses:
+        "200":
+          description: Timeseries data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStatsTimeseries"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+
   /admin/users:
     get:
       operationId: adminListUsers
@@ -1330,6 +1347,26 @@ components:
           items:
             $ref: "#/components/schemas/AdminOrderSummary"
       required: [totalUsers, totalProducts, totalOrders, totalRevenue, ordersByStatus, recentOrders]
+
+    TimeseriesDataPoint:
+      type: object
+      properties:
+        date:
+          type: string
+        revenue:
+          type: number
+        orders:
+          type: integer
+      required: [date, revenue, orders]
+
+    AdminStatsTimeseries:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeseriesDataPoint"
+      required: [data]
 
     PaginatedAdminUsers:
       type: object

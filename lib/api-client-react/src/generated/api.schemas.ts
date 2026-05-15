@@ -366,6 +366,16 @@ export interface AdminStats {
   recentOrders: AdminOrderSummary[];
 }
 
+export interface TimeseriesDataPoint {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface AdminStatsTimeseries {
+  data: TimeseriesDataPoint[];
+}
+
 export interface PaginatedAdminUsers {
   data: AdminUser[];
   total: number;

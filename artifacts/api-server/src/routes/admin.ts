@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, count, sum, desc, inArray } from "drizzle-orm";
+import { eq, count, sum, desc, inArray, gte, sql } from "drizzle-orm";
 import { db, usersTable, productsTable, ordersTable, orderItemsTable, cartItemsTable, platformSettingsTable, adminAuditLogTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../middlewares/auth";
 
@@ -110,6 +110,42 @@ router.get("/admin/stats", async (_req, res): Promise<void> => {
     ordersByStatus: ordersByStatus.map((s) => ({ status: s.status, count: s.count })),
     recentOrders: recentWithDetails,
   });
+});
+
+// ─── TIMESERIES ──────────────────────────────────────────────────────────────
+
+router.get("/admin/stats/timeseries", async (_req, res): Promise<void> => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+  const rows = await db
+    .select({
+      date: sql<string>`DATE(${ordersTable.createdAt})`.as("date"),
+      revenue: sum(ordersTable.total).as("revenue"),
+      orders: count(ordersTable.id).as("orders"),
+    })
+    .from(ordersTable)
+    .where(gte(ordersTable.createdAt, thirtyDaysAgo))
+    .groupBy(sql`DATE(${ordersTable.createdAt})`)
+    .orderBy(sql`DATE(${ordersTable.createdAt})`);
+
+  // Fill in missing days with zeros so the chart always has 30 data points
+  const byDate = new Map(rows.map((r) => [r.date, r]));
+  const data: { date: string; revenue: number; orders: number }[] = [];
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(thirtyDaysAgo);
+    d.setDate(d.getDate() + i);
+    const key = d.toISOString().slice(0, 10);
+    const row = byDate.get(key);
+    data.push({
+      date: key,
+      revenue: row ? parseFloat(row.revenue ?? "0") : 0,
+      orders: row ? row.orders : 0,
+    });
+  }
+
+  res.json({ data });
 });
 
 // ─── USERS ────────────────────────────────────────────────────────────────────
