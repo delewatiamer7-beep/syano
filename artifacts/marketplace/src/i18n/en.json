@@ -301,5 +301,27 @@
     "title": "404 — Page Not Found",
     "desc": "The page you are looking for doesn't exist or has been moved.",
     "back_home": "Back to Home"
+  },
+  "reviews": {
+    "title": "Customer Reviews",
+    "no_reviews": "No reviews yet",
+    "no_reviews_desc": "Be the first to review this product.",
+    "write_review": "Write a Review",
+    "your_rating": "Your Rating",
+    "your_review": "Your Review (optional)",
+    "review_placeholder": "Share your experience with this product...",
+    "submit": "Submit Review",
+    "submitting": "Submitting...",
+    "rating_required": "Please select a rating",
+    "success": "Review submitted!",
+    "success_desc": "Thank you for your feedback.",
+    "error": "Could not submit review.",
+    "already_reviewed": "You have already reviewed this product.",
+    "no_delivered_order": "You can only review products from delivered orders.",
+    "login_to_review": "Log in to write a review",
+    "based_on": "Based on {{count}} review",
+    "based_on_plural": "Based on {{count}} reviews",
+    "verified": "Verified Purchase",
+    "rating_label": "{{rating}} out of 5 stars"
   }
 }

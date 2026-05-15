@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Minus, Plus, ShoppingCart, Truck, ShieldCheck, RefreshCw } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
+import { StarRating } from "@/components/StarRating";
+import { ReviewSection } from "@/components/ReviewSection";
 
 export default function ProductDetail() {
   const params = useParams();
@@ -122,6 +124,18 @@ export default function ProductDetail() {
               {product.name}
             </h1>
 
+            <div className="flex items-center gap-3 mb-3">
+              <StarRating rating={product.averageRating ?? 0} size="md" />
+              {product.reviewCount > 0 ? (
+                <span className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">{(product.averageRating ?? 0).toFixed(1)}</span>
+                  {" "}({product.reviewCount === 1 ? t("reviews.based_on", { count: product.reviewCount }) : t("reviews.based_on_plural", { count: product.reviewCount })})
+                </span>
+              ) : (
+                <span className="text-sm text-muted-foreground">{t("reviews.no_reviews")}</span>
+              )}
+            </div>
+
             <div className="text-muted-foreground mb-5 font-medium text-sm">
               {t("product_detail.sold_by")} <span className="text-foreground font-semibold">{product.sellerName}</span>
             </div>
@@ -228,6 +242,13 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <ReviewSection
+          productId={product.id}
+          averageRating={product.averageRating}
+          reviewCount={product.reviewCount}
+        />
       </div>
     </Layout>
   );

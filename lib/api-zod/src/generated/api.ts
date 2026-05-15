@@ -93,7 +93,9 @@ export const ListProductsResponseItem = zod.object({
   "category": zod.string(),
   "stock": zod.number(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number()
 })
 export const ListProductsResponse = zod.array(ListProductsResponseItem)
 
@@ -137,7 +139,9 @@ export const GetProductResponse = zod.object({
   "category": zod.string(),
   "stock": zod.number(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number()
 })
 
 
@@ -168,7 +172,9 @@ export const UpdateProductResponse = zod.object({
   "category": zod.string(),
   "stock": zod.number(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number()
 })
 
 
@@ -207,7 +213,9 @@ export const UpdateDiscountResponse = zod.object({
   "category": zod.string(),
   "stock": zod.number(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number()
 })
 
 
@@ -234,7 +242,45 @@ export const UpdateStockResponse = zod.object({
   "category": zod.string(),
   "stock": zod.number(),
   "imageUrl": zod.string().nullable(),
+  "createdAt": zod.string(),
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number()
+})
+
+
+/**
+ * @summary List reviews for a product
+ */
+export const ListReviewsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ListReviewsResponseItem = zod.object({
+  "id": zod.number(),
+  "productId": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string(),
+  "rating": zod.number(),
+  "comment": zod.string().nullable(),
   "createdAt": zod.string()
+})
+export const ListReviewsResponse = zod.array(ListReviewsResponseItem)
+
+
+/**
+ * @summary Submit a review for a product (customer only, must have delivered order)
+ */
+export const CreateReviewParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const createReviewBodyRatingMax = 5;
+
+
+
+export const CreateReviewBody = zod.object({
+  "rating": zod.number().min(1).max(createReviewBodyRatingMax),
+  "comment": zod.string().nullish()
 })
 
 
@@ -256,7 +302,9 @@ export const GetCartResponse = zod.object({
   "category": zod.string(),
   "stock": zod.number(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number()
 }),
   "quantity": zod.number(),
   "subtotal": zod.number()
@@ -289,7 +337,9 @@ export const AddToCartResponse = zod.object({
   "category": zod.string(),
   "stock": zod.number(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number()
 }),
   "quantity": zod.number(),
   "subtotal": zod.number()
@@ -325,7 +375,9 @@ export const UpdateCartItemResponse = zod.object({
   "category": zod.string(),
   "stock": zod.number(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number()
 }),
   "quantity": zod.number(),
   "subtotal": zod.number()
@@ -357,7 +409,9 @@ export const RemoveFromCartResponse = zod.object({
   "category": zod.string(),
   "stock": zod.number(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number()
 }),
   "quantity": zod.number(),
   "subtotal": zod.number()

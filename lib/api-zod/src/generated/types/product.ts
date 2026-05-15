@@ -21,4 +21,7 @@ export interface Product {
   /** @nullable */
   imageUrl: string | null;
   createdAt: string;
+  /** @nullable */
+  averageRating: number | null;
+  reviewCount: number;
 }

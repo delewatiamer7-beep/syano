@@ -10,6 +10,7 @@ import { ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { StarRating } from "@/components/StarRating";
 
 interface ProductCardProps {
   product: Product;
@@ -84,9 +85,17 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3 className="font-semibold text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-snug">
           {product.name}
         </h3>
-        <p className="text-sm text-muted-foreground line-clamp-1 mb-auto pb-3">
+        <p className="text-sm text-muted-foreground line-clamp-1 pb-1">
           {t("common.by")} {product.sellerName}
         </p>
+        <div className="flex items-center gap-1.5 mb-auto pb-2">
+          <StarRating rating={product.averageRating ?? 0} size="sm" />
+          {product.reviewCount > 0 ? (
+            <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
+          ) : (
+            <span className="text-xs text-muted-foreground/60">{t("reviews.no_reviews")}</span>
+          )}
+        </div>
 
         <div className="flex items-end justify-between pt-3 border-t border-border/60">
           <div className="flex flex-col gap-0.5">

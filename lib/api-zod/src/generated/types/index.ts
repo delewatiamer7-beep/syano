@@ -30,6 +30,8 @@ export * from './productInput';
 export * from './productUpdate';
 export * from './registerInput';
 export * from './registerInputRole';
+export * from './review';
+export * from './reviewInput';
 export * from './sellerDashboard';
 export * from './statusCount';
 export * from './stockUpdate';

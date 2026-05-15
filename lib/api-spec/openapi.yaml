@@ -10,6 +10,7 @@ tags:
   - name: health
   - name: auth
   - name: products
+  - name: reviews
   - name: cart
   - name: orders
   - name: inventory
@@ -291,6 +292,62 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Product"
+
+  # REVIEWS
+  /products/{id}/reviews:
+    get:
+      operationId: listReviews
+      tags: [reviews]
+      summary: List reviews for a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+        "404":
+          description: Not found
+
+    post:
+      operationId: createReview
+      tags: [reviews]
+      summary: Submit a review for a product (customer only, must have delivered order)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInput"
+      responses:
+        "201":
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: No delivered order for this product
+        "409":
+          description: Already reviewed
 
   # CART
   /cart:
@@ -584,7 +641,41 @@ components:
           type: ["string", "null"]
         createdAt:
           type: string
-      required: [id, sellerId, sellerName, name, description, price, discountPercent, finalPrice, category, stock, imageUrl, createdAt]
+        averageRating:
+          type: ["number", "null"]
+        reviewCount:
+          type: integer
+      required: [id, sellerId, sellerName, name, description, price, discountPercent, finalPrice, category, stock, imageUrl, createdAt, averageRating, reviewCount]
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        userId:
+          type: integer
+        userName:
+          type: string
+        rating:
+          type: integer
+        comment:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, productId, userId, userName, rating, comment, createdAt]
+
+    ReviewInput:
+      type: object
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: ["string", "null"]
+      required: [rating]
 
     ProductInput:
       type: object

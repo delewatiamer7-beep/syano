@@ -78,6 +78,30 @@ export interface Product {
   /** @nullable */
   imageUrl: string | null;
   createdAt: string;
+  /** @nullable */
+  averageRating: number | null;
+  reviewCount: number;
+}
+
+export interface Review {
+  id: number;
+  productId: number;
+  userId: number;
+  userName: string;
+  rating: number;
+  /** @nullable */
+  comment: string | null;
+  createdAt: string;
+}
+
+export interface ReviewInput {
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  rating: number;
+  /** @nullable */
+  comment?: string | null;
 }
 
 export interface ProductInput {

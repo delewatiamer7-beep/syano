@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { eq, ilike, and, or, sql, gte, lte, isNotNull } from "drizzle-orm";
-import { db, productsTable, usersTable } from "@workspace/db";
+import { eq, ilike, and, or, sql, gte, lte, isNotNull, avg, count } from "drizzle-orm";
+import { db, productsTable, usersTable, reviewsTable } from "@workspace/db";
 import {
   ListProductsQueryParams,
   CreateProductBody,
@@ -27,6 +27,13 @@ function computeFinalPrice(price: string, discountPercent: string | null): numbe
 
 async function buildProductResponse(product: typeof productsTable.$inferSelect) {
   const [seller] = await db.select({ name: usersTable.name }).from(usersTable).where(eq(usersTable.id, product.sellerId));
+  const [stats] = await db
+    .select({
+      averageRating: avg(reviewsTable.rating),
+      reviewCount: count(reviewsTable.id),
+    })
+    .from(reviewsTable)
+    .where(eq(reviewsTable.productId, product.id));
   return {
     id: product.id,
     sellerId: product.sellerId,
@@ -40,6 +47,8 @@ async function buildProductResponse(product: typeof productsTable.$inferSelect) 
     stock: product.stock,
     imageUrl: product.imageUrl ?? null,
     createdAt: product.createdAt.toISOString(),
+    averageRating: stats?.averageRating != null ? parseFloat(stats.averageRating) : null,
+    reviewCount: stats?.reviewCount ?? 0,
   };
 }
 
