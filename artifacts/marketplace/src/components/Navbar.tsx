@@ -87,9 +87,6 @@ export function Navbar() {
           </Link>
 
           <nav className="hidden md:flex gap-5">
-            <Link href="/products" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-              {t("nav.discover")}
-            </Link>
             {isSeller && (
               <>
                 <Link href="/seller/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
