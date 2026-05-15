@@ -55,7 +55,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  if (user.role !== role) {
+  // Admin accounts can log in regardless of which role was selected on the form
+  if (user.role !== role && user.role !== "admin") {
     res.status(401).json({ error: `This account is registered as a ${user.role}, not ${role}` });
     return;
   }

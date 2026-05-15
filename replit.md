@@ -40,7 +40,7 @@ A full-stack marketplace/ecommerce app with role-based auth (Seller/Customer), c
 - **Contract-first API**: OpenAPI spec drives Zod validation schemas AND React Query hooks via Orval codegen. Never hand-write API call code.
 - **JWT in localStorage**: Token stored under `localStorage.token`, user under `localStorage.user`. `setAuthTokenGetter` injects it into all generated hooks.
 - **Stock-on-delivery**: Inventory only decreases when a seller marks an order as "delivered" — not at checkout. Implemented in `orders.ts` status-update handler.
-- **Role selector on login**: Login form requires selecting Customer or Seller — server validates the selected role matches the account's registered role.
+- **Role selector on login**: Login form shows Customer and Seller only. Admin accounts bypass role-mismatch validation server-side — entering admin credentials while "Customer" is selected grants admin access and redirects to /admin.
 - **Numeric prices**: DB stores prices as `numeric`/`decimal`; route handlers use `parseFloat()` for JSON serialization. `finalPrice` is computed server-side.
 
 ## Product
@@ -51,7 +51,7 @@ A full-stack marketplace/ecommerce app with role-based auth (Seller/Customer), c
 
 ## Demo accounts
 
-- Admin: `admin@marketplace.com` / `password123`
+- Admin: `delewatiamer7@gmail.com` / `00Amer00` (log in via Customer button)
 - Seller: `seller@demo.com` / `password123`
 - Customer: `customer@demo.com` / `password123`
 - 12 seed products across Electronics, Sports, Home, Fashion categories (some with discounts)

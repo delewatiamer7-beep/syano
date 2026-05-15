@@ -10,13 +10,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Layout } from "@/components/Layout";
-import { Store, UserCircle2, Shield } from "lucide-react";
+import { Store, UserCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
-  role: z.enum(["customer", "seller", "admin"]),
+  role: z.enum(["customer", "seller"]),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -76,7 +76,7 @@ export default function Login() {
                       <RadioGroup
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        className="grid grid-cols-3 gap-2"
+                        className="grid grid-cols-2 gap-2"
                       >
                         <FormItem>
                           <FormControl>
@@ -94,15 +94,6 @@ export default function Login() {
                           <FormLabel className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-colors min-h-[72px]">
                             <Store className="h-5 w-5" />
                             <span className="text-xs font-medium">{t("auth.seller")}</span>
-                          </FormLabel>
-                        </FormItem>
-                        <FormItem>
-                          <FormControl>
-                            <RadioGroupItem value="admin" className="peer sr-only" />
-                          </FormControl>
-                          <FormLabel className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-colors min-h-[72px]">
-                            <Shield className="h-5 w-5" />
-                            <span className="text-xs font-medium">{t("auth.admin")}</span>
                           </FormLabel>
                         </FormItem>
                       </RadioGroup>
