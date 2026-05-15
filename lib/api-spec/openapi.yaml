@@ -574,7 +574,7 @@ components:
           type: string
         role:
           type: string
-          enum: [customer, seller]
+          enum: [customer, seller, admin]
         createdAt:
           type: string
       required: [id, email, name, role, createdAt]
@@ -611,7 +611,7 @@ components:
           type: string
         role:
           type: string
-          enum: [customer, seller]
+          enum: [customer, seller, admin]
       required: [email, password, role]
 
     Product:

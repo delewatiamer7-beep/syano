@@ -1,0 +1,154 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AdminLayout } from "@/components/AdminLayout";
+import { adminApi, type AdminOrder } from "@/lib/adminApi";
+import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { ShoppingCart, Search } from "lucide-react";
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+  processing: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  shipped: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+  delivered: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  cancelled: "bg-red-500/10 text-red-600 dark:text-red-400",
+};
+
+const STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"];
+
+export default function AdminOrders() {
+  const { t } = useTranslation();
+  const { format } = useCurrency();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ["admin", "orders"],
+    queryFn: () => adminApi.getOrders(),
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      adminApi.updateOrderStatus(id, status),
+    onSuccess: () => {
+      toast({ title: t("admin.order_updated") });
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+    },
+    onError: (err: any) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
+  });
+
+  const filtered = orders.filter((o) => {
+    const matchesSearch =
+      o.customerName.toLowerCase().includes(search.toLowerCase()) ||
+      o.customerEmail.toLowerCase().includes(search.toLowerCase()) ||
+      String(o.id).includes(search);
+    const matchesStatus = statusFilter === "all" || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  return (
+    <AdminLayout>
+      <div className="p-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <ShoppingCart className="h-6 w-6" /> {t("admin.nav_orders")}
+            </h1>
+            <p className="text-muted-foreground mt-1">{t("admin.orders_desc")}</p>
+          </div>
+          <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
+            {filtered.length} {t("admin.total_count")}
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input className="ps-9" placeholder={t("admin.search_orders")} value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder={t("admin.filter_status")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("admin.all_statuses")}</SelectItem>
+              {STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>{t(`orders.status_${s}`)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 border-b border-border">
+                <tr>
+                  <th className="text-start px-4 py-3 font-semibold text-muted-foreground">{t("admin.col_order")}</th>
+                  <th className="text-start px-4 py-3 font-semibold text-muted-foreground">{t("admin.col_customer")}</th>
+                  <th className="text-start px-4 py-3 font-semibold text-muted-foreground">{t("admin.col_items")}</th>
+                  <th className="text-start px-4 py-3 font-semibold text-muted-foreground">{t("admin.col_total")}</th>
+                  <th className="text-start px-4 py-3 font-semibold text-muted-foreground">{t("admin.col_date")}</th>
+                  <th className="text-start px-4 py-3 font-semibold text-muted-foreground">{t("admin.col_status")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {isLoading && Array.from({ length: 8 }).map((_, i) => (
+                  <tr key={i}>
+                    {Array.from({ length: 6 }).map((_, j) => (
+                      <td key={j} className="px-4 py-3"><div className="h-4 bg-muted animate-pulse rounded" /></td>
+                    ))}
+                  </tr>
+                ))}
+                {!isLoading && filtered.map((order) => (
+                  <tr key={order.id} className="hover:bg-muted/20 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{order.id}</td>
+                    <td className="px-4 py-3">
+                      <div>
+                        <p className="font-medium text-foreground">{order.customerName}</p>
+                        <p className="text-xs text-muted-foreground">{order.customerEmail}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{order.items.length}</td>
+                    <td className="px-4 py-3 font-semibold">{format(order.total)}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Select
+                        value={order.status}
+                        onValueChange={(status) => updateStatus.mutate({ id: order.id, status })}
+                      >
+                        <SelectTrigger className={`h-7 text-xs w-36 font-semibold border-0 ${STATUS_COLORS[order.status] ?? ""}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {STATUSES.map((s) => (
+                            <SelectItem key={s} value={s}>{t(`orders.status_${s}`)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </td>
+                  </tr>
+                ))}
+                {!isLoading && !filtered.length && (
+                  <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">{t("admin.no_results")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </AdminLayout>
+  );
+}

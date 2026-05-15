@@ -19,6 +19,7 @@ export type UserRole = typeof UserRole[keyof typeof UserRole];
 export const UserRole = {
   customer: 'customer',
   seller: 'seller',
+  admin: 'admin',
 } as const;
 
 export interface User {
@@ -55,6 +56,7 @@ export type LoginInputRole = typeof LoginInputRole[keyof typeof LoginInputRole];
 export const LoginInputRole = {
   customer: 'customer',
   seller: 'seller',
+  admin: 'admin',
 } as const;
 
 export interface LoginInput {

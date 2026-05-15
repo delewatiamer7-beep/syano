@@ -12,4 +12,5 @@ export type LoginInputRole = typeof LoginInputRole[keyof typeof LoginInputRole];
 export const LoginInputRole = {
   customer: 'customer',
   seller: 'seller',
+  admin: 'admin',
 } as const;

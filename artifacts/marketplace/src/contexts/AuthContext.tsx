@@ -9,6 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isSeller: boolean;
   isCustomer: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -21,13 +22,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
-    
+
     if (storedToken && storedUser) {
       try {
         setUser(JSON.parse(storedUser));
         setToken(storedToken);
       } catch (e) {
-        console.error("Failed to parse user from localStorage", e);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
       }
@@ -54,9 +54,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!token;
   const isSeller = user?.role === "seller";
   const isCustomer = user?.role === "customer";
+  const isAdmin = user?.role === "admin";
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, isSeller, isCustomer }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, isSeller, isCustomer, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
@@ -64,8 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 }

@@ -33,7 +33,7 @@ export const RegisterBody = zod.object({
 export const LoginBody = zod.object({
   "email": zod.string(),
   "password": zod.string(),
-  "role": zod.enum(['customer', 'seller'])
+  "role": zod.enum(['customer', 'seller', 'admin'])
 })
 
 export const LoginResponse = zod.object({
@@ -41,7 +41,7 @@ export const LoginResponse = zod.object({
   "id": zod.number(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['customer', 'seller']),
+  "role": zod.enum(['customer', 'seller', 'admin']),
   "createdAt": zod.string()
 }),
   "token": zod.string()
@@ -63,7 +63,7 @@ export const GetMeResponse = zod.object({
   "id": zod.number(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['customer', 'seller']),
+  "role": zod.enum(['customer', 'seller', 'admin']),
   "createdAt": zod.string()
 })
 

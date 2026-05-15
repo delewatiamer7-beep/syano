@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.SESSION_SECRET ?? "dev-secret-change-in-prod";
 
 export interface JwtPayload {
   userId: number;
-  role: "customer" | "seller";
+  role: "customer" | "seller" | "admin";
   email: string;
 }
 
@@ -29,7 +29,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   }
 }
 
-export function requireRole(role: "customer" | "seller") {
+export function requireRole(role: "customer" | "seller" | "admin") {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({ error: "Unauthorized" });

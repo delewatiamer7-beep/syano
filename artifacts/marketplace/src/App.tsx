@@ -29,6 +29,11 @@ const NewProduct        = lazy(() => import("@/pages/seller/products/new"));
 const EditProduct       = lazy(() => import("@/pages/seller/products/[id]/edit"));
 const SellerOrders      = lazy(() => import("@/pages/seller/orders"));
 const Inventory         = lazy(() => import("@/pages/seller/inventory"));
+const AdminDashboard    = lazy(() => import("@/pages/admin/index"));
+const AdminUsers        = lazy(() => import("@/pages/admin/users"));
+const AdminProducts     = lazy(() => import("@/pages/admin/products"));
+const AdminOrders       = lazy(() => import("@/pages/admin/orders"));
+const AdminSettings     = lazy(() => import("@/pages/admin/settings"));
 
 setupApi();
 
@@ -87,6 +92,22 @@ function Router() {
           </Route>
           <Route path="/seller/inventory">
             <ProtectedRoute allowedRoles={["seller"]}><Inventory /></ProtectedRoute>
+          </Route>
+
+          <Route path="/admin">
+            <ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>
+          </Route>
+          <Route path="/admin/users">
+            <ProtectedRoute allowedRoles={["admin"]}><AdminUsers /></ProtectedRoute>
+          </Route>
+          <Route path="/admin/products">
+            <ProtectedRoute allowedRoles={["admin"]}><AdminProducts /></ProtectedRoute>
+          </Route>
+          <Route path="/admin/orders">
+            <ProtectedRoute allowedRoles={["admin"]}><AdminOrders /></ProtectedRoute>
+          </Route>
+          <Route path="/admin/settings">
+            <ProtectedRoute allowedRoles={["admin"]}><AdminSettings /></ProtectedRoute>
           </Route>
 
           <Route component={NotFound} />

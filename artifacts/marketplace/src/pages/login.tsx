@@ -10,13 +10,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Layout } from "@/components/Layout";
-import { Store, UserCircle2 } from "lucide-react";
+import { Store, UserCircle2, Shield } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
-  role: z.enum(["customer", "seller"]),
+  role: z.enum(["customer", "seller", "admin"]),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -37,7 +37,9 @@ export default function Login() {
       onSuccess: (data) => {
         setAuth(data);
         toast({ title: t("auth.login_success") });
-        setLocation(data.user.role === "seller" ? "/seller/dashboard" : "/");
+        if (data.user.role === "admin") setLocation("/admin");
+        else if (data.user.role === "seller") setLocation("/seller/dashboard");
+        else setLocation("/");
       },
       onError: (error: any) => {
         toast({
@@ -74,24 +76,33 @@ export default function Login() {
                       <RadioGroup
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        className="grid grid-cols-2 gap-3"
+                        className="grid grid-cols-3 gap-2"
                       >
                         <FormItem>
                           <FormControl>
                             <RadioGroupItem value="customer" className="peer sr-only" />
                           </FormControl>
-                          <FormLabel className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-colors min-h-[80px]">
-                            <UserCircle2 className="h-6 w-6" />
-                            <span className="text-sm font-medium">{t("auth.customer")}</span>
+                          <FormLabel className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-colors min-h-[72px]">
+                            <UserCircle2 className="h-5 w-5" />
+                            <span className="text-xs font-medium">{t("auth.customer")}</span>
                           </FormLabel>
                         </FormItem>
                         <FormItem>
                           <FormControl>
                             <RadioGroupItem value="seller" className="peer sr-only" />
                           </FormControl>
-                          <FormLabel className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-colors min-h-[80px]">
-                            <Store className="h-6 w-6" />
-                            <span className="text-sm font-medium">{t("auth.seller")}</span>
+                          <FormLabel className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-colors min-h-[72px]">
+                            <Store className="h-5 w-5" />
+                            <span className="text-xs font-medium">{t("auth.seller")}</span>
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem>
+                          <FormControl>
+                            <RadioGroupItem value="admin" className="peer sr-only" />
+                          </FormControl>
+                          <FormLabel className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-colors min-h-[72px]">
+                            <Shield className="h-5 w-5" />
+                            <span className="text-xs font-medium">{t("auth.admin")}</span>
                           </FormLabel>
                         </FormItem>
                       </RadioGroup>

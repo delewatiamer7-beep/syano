@@ -50,6 +50,7 @@ A full-stack marketplace/ecommerce app with role-based auth (Seller/Customer), c
 
 ## Demo accounts
 
+- Admin: `admin@marketplace.com` / `password123`
 - Seller: `seller@demo.com` / `password123`
 - Customer: `customer@demo.com` / `password123`
 - 12 seed products across Electronics, Sports, Home, Fashion categories (some with discounts)
