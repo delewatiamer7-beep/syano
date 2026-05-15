@@ -4,14 +4,12 @@ import { router } from "expo-router";
 import React from "react";
 import {
   Alert,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   useGetCustomerDashboard,
   useGetSellerDashboard,
@@ -20,16 +18,15 @@ import {
 } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { useScreenLayout } from "@/hooks/useScreenLayout";
 
 export default function ProfileScreen() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
+  const { topPad, tabBarHeight } = useScreenLayout();
   const { user, logout, isSeller, isCustomer } = useAuth();
 
   const customerDash = useGetCustomerDashboard({ query: { enabled: isCustomer, queryKey: getGetCustomerDashboardQueryKey() } });
   const sellerDash = useGetSellerDashboard({ query: { enabled: isSeller, queryKey: getGetSellerDashboardQueryKey() } });
-
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   async function handleLogout() {
     Alert.alert("Sign out", "Are you sure you want to sign out?", [
@@ -65,7 +62,7 @@ export default function ProfileScreen() {
         styles.content,
         {
           paddingTop: topPad + 16,
-          paddingBottom: insets.bottom + (Platform.OS === "web" ? 84 : 90),
+          paddingBottom: tabBarHeight,
         },
       ]}
       showsVerticalScrollIndicator={false}

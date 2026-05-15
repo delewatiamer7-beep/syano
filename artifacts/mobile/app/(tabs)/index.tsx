@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -14,7 +13,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   useAddToCart,
   useGetSellerDashboard,
@@ -25,6 +23,7 @@ import type { Product } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/ProductCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { useScreenLayout } from "@/hooks/useScreenLayout";
 
 export default function HomeScreen() {
   const { isSeller } = useAuth();
@@ -33,7 +32,7 @@ export default function HomeScreen() {
 
 function CustomerShop() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
+  const { topPad, tabBarHeight } = useScreenLayout();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -63,8 +62,6 @@ function CustomerShop() {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     addToCart.mutate({ data: { productId: product.id, quantity: 1 } });
   }
-
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   return (
     <View style={[styles.shopContainer, { backgroundColor: colors.background }]}>
@@ -187,9 +184,7 @@ function CustomerShop() {
           columnWrapperStyle={styles.row}
           contentContainerStyle={[
             styles.grid,
-            {
-              paddingBottom: insets.bottom + (Platform.OS === "web" ? 84 : 90),
-            },
+            { paddingBottom: tabBarHeight },
           ]}
           refreshControl={
             <RefreshControl
@@ -243,17 +238,15 @@ function StatCard({
 
 function SellerDashboard() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
+  const { topPad, tabBarHeight } = useScreenLayout();
   const { data, isLoading, refetch, isRefetching } = useGetSellerDashboard();
-
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   return (
     <ScrollView
       style={[styles.shopContainer, { backgroundColor: colors.background }]}
       contentContainerStyle={{
         paddingTop: topPad + 16,
-        paddingBottom: insets.bottom + (Platform.OS === "web" ? 84 : 90),
+        paddingBottom: tabBarHeight,
         paddingHorizontal: 16,
         gap: 16,
       }}

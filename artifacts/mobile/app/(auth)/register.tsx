@@ -68,126 +68,128 @@ export default function RegisterScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingTop: topInset + 24, paddingBottom: insets.bottom + 24 },
+          { paddingTop: topInset + 24, paddingBottom: insets.bottom + 32 },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
-            <Ionicons name="bag" size={32} color={colors.primaryForeground} />
+        <View style={styles.formSection}>
+          <View style={styles.header}>
+            <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
+              <Ionicons name="bag" size={32} color={colors.primaryForeground} />
+            </View>
+            <Text style={[styles.title, { color: colors.foreground }]}>Create account</Text>
+            <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
+              Join the marketplace today
+            </Text>
           </View>
-          <Text style={[styles.title, { color: colors.foreground }]}>Create account</Text>
-          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-            Join the marketplace today
-          </Text>
-        </View>
 
-        <View style={styles.roleRow}>
-          {(["customer", "seller"] as const).map((r) => (
-            <Pressable
-              key={r}
-              testID={`role-${r}`}
-              style={({ pressed }) => [
-                styles.roleBtn,
-                {
-                  backgroundColor:
-                    role === r ? colors.primary : colors.secondary,
-                  borderColor: role === r ? colors.primary : colors.border,
-                  opacity: pressed ? 0.85 : 1,
-                },
-              ]}
-              onPress={() => setRole(r)}
-            >
-              <Ionicons
-                name={r === "customer" ? "person-outline" : "storefront-outline"}
-                size={16}
-                color={role === r ? colors.primaryForeground : colors.mutedForeground}
-              />
-              <Text
-                style={[
-                  styles.roleBtnText,
+          <View style={styles.roleRow}>
+            {(["customer", "seller"] as const).map((r) => (
+              <Pressable
+                key={r}
+                testID={`role-${r}`}
+                style={({ pressed }) => [
+                  styles.roleBtn,
                   {
-                    color:
-                      role === r ? colors.primaryForeground : colors.foreground,
+                    backgroundColor:
+                      role === r ? colors.primary : colors.secondary,
+                    borderColor: role === r ? colors.primary : colors.border,
+                    opacity: pressed ? 0.85 : 1,
                   },
                 ]}
+                onPress={() => setRole(r)}
               >
-                {r.charAt(0).toUpperCase() + r.slice(1)}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        <View style={styles.form}>
-          <View style={[styles.inputWrap, { borderColor: colors.border, backgroundColor: colors.card }]}>
-            <Ionicons name="person-outline" size={18} color={colors.mutedForeground} />
-            <TextInput
-              style={[styles.input, { color: colors.foreground }]}
-              placeholder="Full name"
-              placeholderTextColor={colors.mutedForeground}
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-              autoComplete="name"
-            />
+                <Ionicons
+                  name={r === "customer" ? "person-outline" : "storefront-outline"}
+                  size={16}
+                  color={role === r ? colors.primaryForeground : colors.mutedForeground}
+                />
+                <Text
+                  style={[
+                    styles.roleBtnText,
+                    {
+                      color:
+                        role === r ? colors.primaryForeground : colors.foreground,
+                    },
+                  ]}
+                >
+                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                </Text>
+              </Pressable>
+            ))}
           </View>
 
-          <View style={[styles.inputWrap, { borderColor: colors.border, backgroundColor: colors.card }]}>
-            <Ionicons name="mail-outline" size={18} color={colors.mutedForeground} />
-            <TextInput
-              style={[styles.input, { color: colors.foreground }]}
-              placeholder="Email"
-              placeholderTextColor={colors.mutedForeground}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-          </View>
-
-          <View style={[styles.inputWrap, { borderColor: colors.border, backgroundColor: colors.card }]}>
-            <Ionicons name="lock-closed-outline" size={18} color={colors.mutedForeground} />
-            <TextInput
-              style={[styles.input, { color: colors.foreground }]}
-              placeholder="Password (min. 6 chars)"
-              placeholderTextColor={colors.mutedForeground}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoComplete="new-password"
-            />
-            <Pressable onPress={() => setShowPassword((p) => !p)}>
-              <Ionicons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
-                size={18}
-                color={colors.mutedForeground}
+          <View style={styles.form}>
+            <View style={[styles.inputWrap, { borderColor: colors.border, backgroundColor: colors.card }]}>
+              <Ionicons name="person-outline" size={18} color={colors.mutedForeground} />
+              <TextInput
+                style={[styles.input, { color: colors.foreground }]}
+                placeholder="Full name"
+                placeholderTextColor={colors.mutedForeground}
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                autoComplete="name"
               />
+            </View>
+
+            <View style={[styles.inputWrap, { borderColor: colors.border, backgroundColor: colors.card }]}>
+              <Ionicons name="mail-outline" size={18} color={colors.mutedForeground} />
+              <TextInput
+                style={[styles.input, { color: colors.foreground }]}
+                placeholder="Email"
+                placeholderTextColor={colors.mutedForeground}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+              />
+            </View>
+
+            <View style={[styles.inputWrap, { borderColor: colors.border, backgroundColor: colors.card }]}>
+              <Ionicons name="lock-closed-outline" size={18} color={colors.mutedForeground} />
+              <TextInput
+                style={[styles.input, { color: colors.foreground }]}
+                placeholder="Password (min. 6 chars)"
+                placeholderTextColor={colors.mutedForeground}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoComplete="new-password"
+              />
+              <Pressable onPress={() => setShowPassword((p) => !p)}>
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={18}
+                  color={colors.mutedForeground}
+                />
+              </Pressable>
+            </View>
+
+            {!!error && (
+              <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>
+            )}
+
+            <Pressable
+              testID="register-btn"
+              style={({ pressed }) => [
+                styles.submitBtn,
+                { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
+              ]}
+              onPress={handleRegister}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <ActivityIndicator color={colors.primaryForeground} />
+              ) : (
+                <Text style={[styles.submitText, { color: colors.primaryForeground }]}>
+                  Create Account
+                </Text>
+              )}
             </Pressable>
           </View>
-
-          {!!error && (
-            <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>
-          )}
-
-          <Pressable
-            testID="register-btn"
-            style={({ pressed }) => [
-              styles.submitBtn,
-              { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
-            ]}
-            onPress={handleRegister}
-            disabled={isPending}
-          >
-            {isPending ? (
-              <ActivityIndicator color={colors.primaryForeground} />
-            ) : (
-              <Text style={[styles.submitText, { color: colors.primaryForeground }]}>
-                Create Account
-              </Text>
-            )}
-          </Pressable>
         </View>
 
         <View style={styles.footer}>
@@ -206,9 +208,11 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: {
+    flexGrow: 1,
     paddingHorizontal: 24,
-    gap: 20,
+    justifyContent: "space-between",
   },
+  formSection: { gap: 20 },
   header: { alignItems: "center", gap: 8 },
   logoCircle: {
     width: 64,
@@ -252,7 +256,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitText: { fontSize: 16, fontWeight: "700" as const },
-  footer: { flexDirection: "row", justifyContent: "center", marginTop: 4 },
+  footer: { flexDirection: "row", justifyContent: "center", paddingTop: 24 },
   footerText: { fontSize: 14 },
   footerLink: { fontSize: 14, fontWeight: "600" as const },
 });

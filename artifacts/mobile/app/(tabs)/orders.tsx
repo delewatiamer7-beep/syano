@@ -3,19 +3,18 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Platform,
   Pressable,
   RefreshControl,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useListOrders, useUpdateOrderStatus } from "@workspace/api-client-react";
 import type { Order } from "@workspace/api-client-react";
 import { OrderCard } from "@/components/OrderCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { useScreenLayout } from "@/hooks/useScreenLayout";
 
 const ORDER_STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"] as const;
 type OrderStatus = typeof ORDER_STATUSES[number];
@@ -39,14 +38,12 @@ const STATUS_COLOR: Record<string, string> = {
 export default function OrdersScreen() {
   const { isSeller } = useAuth();
   const colors = useColors();
-  const insets = useSafeAreaInsets();
+  const { topPad, tabBarHeight } = useScreenLayout();
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const { data: orders = [], isLoading, refetch, isRefetching } = useListOrders();
   const updateStatus = useUpdateOrderStatus();
 
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
-
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   function handleAdvanceStatus(order: Order) {
     const next = STATUS_NEXT[order.status];
@@ -119,7 +116,7 @@ export default function OrdersScreen() {
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={[
             styles.list,
-            { paddingBottom: insets.bottom + (Platform.OS === "web" ? 84 : 90) },
+            { paddingBottom: tabBarHeight },
           ]}
           refreshControl={
             <RefreshControl

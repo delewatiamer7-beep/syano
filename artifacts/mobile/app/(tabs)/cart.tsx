@@ -7,7 +7,7 @@ import {
   Alert,
   FlatList,
   Image,
-  Platform,
+  LayoutChangeEvent,
   Pressable,
   StyleSheet,
   Text,
@@ -24,6 +24,7 @@ import {
 } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { useScreenLayout } from "@/hooks/useScreenLayout";
 
 export default function CartTab() {
   const { isSeller } = useAuth();
@@ -32,8 +33,7 @@ export default function CartTab() {
 
 function SellerProductsPlaceholder() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const { topPad } = useScreenLayout();
   return (
     <View
       style={[
@@ -59,6 +59,7 @@ function SellerProductsPlaceholder() {
 function CartScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { topPad } = useScreenLayout();
   const { data: cart, isLoading, refetch } = useGetCart();
   const removeItem = useRemoveFromCart();
   const updateItem = useUpdateCartItem();
@@ -68,8 +69,7 @@ function CartScreen() {
   const [address, setAddress] = useState("");
   const [showCheckout, setShowCheckout] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
-
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const [checkoutBarHeight, setCheckoutBarHeight] = useState(88);
 
   function handleRemove(productId: number) {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -107,6 +107,11 @@ function CartScreen() {
         },
       }
     );
+  }
+
+  function handleCheckoutBarLayout(e: LayoutChangeEvent) {
+    const h = e.nativeEvent.layout.height;
+    if (h > 0) setCheckoutBarHeight(h);
   }
 
   if (isLoading) {
@@ -173,7 +178,7 @@ function CartScreen() {
             keyExtractor={(item) => String(item.productId)}
             contentContainerStyle={[
               styles.listContent,
-              { paddingBottom: insets.bottom + 160 },
+              { paddingBottom: checkoutBarHeight + insets.bottom },
             ]}
             renderItem={({ item }) => (
               <View
@@ -229,12 +234,13 @@ function CartScreen() {
           />
 
           <View
+            onLayout={handleCheckoutBarLayout}
             style={[
               styles.checkoutBar,
               {
                 backgroundColor: colors.card,
                 borderTopColor: colors.border,
-                paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 8),
+                paddingBottom: insets.bottom + 8,
               },
             ]}
           >

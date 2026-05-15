@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  LayoutChangeEvent,
   Platform,
   Pressable,
   ScrollView,
@@ -24,6 +25,7 @@ export default function ProductDetailScreen() {
   const { isCustomer } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [addedFeedback, setAddedFeedback] = useState(false);
+  const [footerHeight, setFooterHeight] = useState(82);
 
   const { data: product, isLoading } = useGetProduct(Number(id));
   const addToCart = useAddToCart();
@@ -42,7 +44,13 @@ export default function ProductDetailScreen() {
     );
   }
 
+  function handleFooterLayout(e: LayoutChangeEvent) {
+    const h = e.nativeEvent.layout.height;
+    if (h > 0) setFooterHeight(h);
+  }
+
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   if (isLoading) {
     return (
@@ -62,6 +70,7 @@ export default function ProductDetailScreen() {
   }
 
   const hasDiscount = product.discountPercent != null && product.discountPercent > 0;
+  const scrollBottomPad = isCustomer && product.stock > 0 ? footerHeight + bottomPad + 8 : bottomPad + 16;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -69,7 +78,7 @@ export default function ProductDetailScreen() {
         style={({ pressed }) => [
           styles.backBtn,
           {
-            top: Platform.OS === "web" ? 67 + 8 : insets.top + 8,
+            top: topPad + 8,
             backgroundColor: colors.card,
             borderColor: colors.border,
             opacity: pressed ? 0.8 : 1,
@@ -81,7 +90,7 @@ export default function ProductDetailScreen() {
       </Pressable>
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: bottomPad + 100 }}
+        contentContainerStyle={{ paddingBottom: scrollBottomPad }}
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.heroImage, { backgroundColor: colors.muted }]}>
@@ -142,6 +151,7 @@ export default function ProductDetailScreen() {
 
       {isCustomer && product.stock > 0 && (
         <View
+          onLayout={handleFooterLayout}
           style={[
             styles.footer,
             {
@@ -217,7 +227,7 @@ const styles = StyleSheet.create({
   },
   heroImage: {
     width: "100%",
-    aspectRatio: 1,
+    aspectRatio: 4 / 3,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
