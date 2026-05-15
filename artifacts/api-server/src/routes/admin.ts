@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, count, sum, desc, inArray } from "drizzle-orm";
-import { db, usersTable, productsTable, ordersTable, orderItemsTable, cartItemsTable, platformSettingsTable } from "@workspace/db";
+import { db, usersTable, productsTable, ordersTable, orderItemsTable, cartItemsTable, platformSettingsTable, adminAuditLogTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -13,6 +13,32 @@ function parsePagination(query: Record<string, unknown>): { page: number; limit:
 
 function paginated<T>(data: T[], total: number, page: number, limit: number) {
   return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+}
+
+async function logAudit(
+  actorId: number,
+  action: string,
+  targetType: string,
+  targetId: string | null,
+  metadata?: Record<string, unknown>
+): Promise<void> {
+  try {
+    const [actor] = await db
+      .select({ name: usersTable.name })
+      .from(usersTable)
+      .where(eq(usersTable.id, actorId));
+
+    await db.insert(adminAuditLogTable).values({
+      actorId,
+      actorName: actor?.name ?? "Admin",
+      action,
+      targetType,
+      targetId,
+      metadata: metadata ?? null,
+    });
+  } catch {
+    // Audit logging is best-effort — a failure here must not affect the mutation response
+  }
 }
 
 // ─── PUBLIC ──────────────────────────────────────────────────────────────────
@@ -108,7 +134,7 @@ router.delete("/admin/users/:id", async (req, res): Promise<void> => {
   if (isNaN(id)) { res.status(400).json({ error: "Invalid user ID" }); return; }
   if (id === req.user!.userId) { res.status(400).json({ error: "Cannot delete your own admin account" }); return; }
 
-  const [existing] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, id));
+  const [existing] = await db.select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, role: usersTable.role }).from(usersTable).where(eq(usersTable.id, id));
   if (!existing) { res.status(404).json({ error: "User not found" }); return; }
 
   // Cascade-delete in FK-safe order inside a transaction
@@ -143,6 +169,14 @@ router.delete("/admin/users/:id", async (req, res): Promise<void> => {
     // 4. Delete the user
     await tx.delete(usersTable).where(eq(usersTable.id, id));
   });
+
+  await logAudit(
+    req.user!.userId,
+    "DELETE_USER",
+    "user",
+    String(id),
+    { name: existing.name, email: existing.email, role: existing.role }
+  );
 
   res.json({ message: "User deleted" });
 });
@@ -195,7 +229,7 @@ router.patch("/admin/products/:id", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid product ID" }); return; }
 
-  const [existing] = await db.select({ id: productsTable.id }).from(productsTable).where(eq(productsTable.id, id));
+  const [existing] = await db.select({ id: productsTable.id, name: productsTable.name }).from(productsTable).where(eq(productsTable.id, id));
   if (!existing) { res.status(404).json({ error: "Product not found" }); return; }
 
   const { name, description, price, category, stock, discountPercent, imageUrl } = req.body;
@@ -216,6 +250,14 @@ router.patch("/admin/products/:id", async (req, res): Promise<void> => {
     .leftJoin(usersTable, eq(productsTable.sellerId, usersTable.id))
     .where(eq(productsTable.id, id));
 
+  await logAudit(
+    req.user!.userId,
+    "UPDATE_PRODUCT",
+    "product",
+    String(id),
+    { productName: existing.name, changes: update }
+  );
+
   res.json({
     id: updated.id,
     sellerId: updated.sellerId,
@@ -235,7 +277,7 @@ router.delete("/admin/products/:id", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid product ID" }); return; }
 
-  const [existing] = await db.select({ id: productsTable.id }).from(productsTable).where(eq(productsTable.id, id));
+  const [existing] = await db.select({ id: productsTable.id, name: productsTable.name }).from(productsTable).where(eq(productsTable.id, id));
   if (!existing) { res.status(404).json({ error: "Product not found" }); return; }
 
   await db.transaction(async (tx) => {
@@ -243,6 +285,15 @@ router.delete("/admin/products/:id", async (req, res): Promise<void> => {
     await tx.delete(cartItemsTable).where(eq(cartItemsTable.productId, id));
     await tx.delete(productsTable).where(eq(productsTable.id, id));
   });
+
+  await logAudit(
+    req.user!.userId,
+    "DELETE_PRODUCT",
+    "product",
+    String(id),
+    { productName: existing.name }
+  );
+
   res.json({ message: "Product deleted" });
 });
 
@@ -302,7 +353,7 @@ router.patch("/admin/orders/:id/status", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid order ID" }); return; }
 
-  const [existing] = await db.select({ id: ordersTable.id }).from(ordersTable).where(eq(ordersTable.id, id));
+  const [existing] = await db.select({ id: ordersTable.id, status: ordersTable.status }).from(ordersTable).where(eq(ordersTable.id, id));
   if (!existing) { res.status(404).json({ error: "Order not found" }); return; }
 
   const { status } = req.body;
@@ -310,7 +361,44 @@ router.patch("/admin/orders/:id/status", async (req, res): Promise<void> => {
   if (!validStatuses.includes(status)) { res.status(400).json({ error: "Invalid status" }); return; }
 
   await db.update(ordersTable).set({ status, updatedAt: new Date() }).where(eq(ordersTable.id, id));
+
+  await logAudit(
+    req.user!.userId,
+    "UPDATE_ORDER_STATUS",
+    "order",
+    String(id),
+    { previousStatus: existing.status, newStatus: status }
+  );
+
   res.json({ message: "Order status updated", status });
+});
+
+// ─── AUDIT LOGS ──────────────────────────────────────────────────────────────
+
+router.get("/admin/logs", async (req, res): Promise<void> => {
+  const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+
+  const [{ total }] = await db.select({ total: count(adminAuditLogTable.id) }).from(adminAuditLogTable);
+
+  const logs = await db
+    .select()
+    .from(adminAuditLogTable)
+    .orderBy(desc(adminAuditLogTable.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  const data = logs.map((l) => ({
+    id: l.id,
+    actorId: l.actorId,
+    actorName: l.actorName,
+    action: l.action,
+    targetType: l.targetType,
+    targetId: l.targetId ?? null,
+    metadata: l.metadata as Record<string, unknown> | null,
+    createdAt: l.createdAt.toISOString(),
+  }));
+
+  res.json(paginated(data, total, page, limit));
 });
 
 // ─── SETTINGS ────────────────────────────────────────────────────────────────
@@ -331,6 +419,14 @@ router.patch("/admin/settings", async (req, res): Promise<void> => {
       .insert(platformSettingsTable)
       .values({ key: "exchange_rate", value: String(rate) })
       .onConflictDoUpdate({ target: platformSettingsTable.key, set: { value: String(rate) } });
+
+    await logAudit(
+      req.user!.userId,
+      "UPDATE_SETTINGS",
+      "settings",
+      "exchange_rate",
+      { newValue: rate }
+    );
   }
   res.json({ message: "Settings updated" });
 });

@@ -20,9 +20,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminListLogsParams,
   AdminListOrdersParams,
   AdminListProductsParams,
   AdminListUsersParams,
+  AdminLogsPage,
   AdminProduct,
   AdminProductUpdate,
   AdminSettings,
@@ -2677,6 +2679,90 @@ export const useAdminUpdateOrderStatus = <TError = ErrorType<void>,
       > => {
       return useMutation(getAdminUpdateOrderStatusMutationOptions(options));
     }
+
+export const getAdminListLogsUrl = (params?: AdminListLogsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/logs?${stringifiedParams}` : `/api/admin/logs`
+}
+
+/**
+ * @summary List admin audit log entries (admin only)
+ */
+export const adminListLogs = async (params?: AdminListLogsParams, options?: RequestInit): Promise<AdminLogsPage> => {
+
+  return customFetch<AdminLogsPage>(getAdminListLogsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListLogsQueryKey = (params?: AdminListLogsParams,) => {
+    return [
+    `/api/admin/logs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminListLogsQueryOptions = <TData = Awaited<ReturnType<typeof adminListLogs>>, TError = ErrorType<unknown>>(params?: AdminListLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListLogsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListLogs>>> = ({ signal }) => adminListLogs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListLogs>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminListLogsQueryResult = NonNullable<Awaited<ReturnType<typeof adminListLogs>>>
+export type AdminListLogsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List admin audit log entries (admin only)
+ */
+
+export function useAdminListLogs<TData = Awaited<ReturnType<typeof adminListLogs>>, TError = ErrorType<unknown>>(
+ params?: AdminListLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminListLogsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const getAdminGetSettingsUrl = () => {
 

@@ -755,6 +755,28 @@ paths:
         "404":
           description: Order not found
 
+  /admin/logs:
+    get:
+      operationId: adminListLogs
+      tags: [admin]
+      summary: List admin audit log entries (admin only)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Paginated audit log entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLogsPage"
+
   /admin/settings:
     get:
       operationId: adminGetSettings
@@ -787,6 +809,47 @@ paths:
 
 components:
   schemas:
+    AdminAuditLogEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        actorId:
+          type: integer
+        actorName:
+          type: string
+        action:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+        createdAt:
+          type: string
+      required: [id, actorId, actorName, action, targetType, createdAt]
+
+    AdminLogsPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminAuditLogEntry"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+      required: [data, total, page, limit, totalPages]
+
     HealthStatus:
       type: object
       properties:

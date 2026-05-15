@@ -34,6 +34,7 @@ const AdminUsers        = lazy(() => import("@/pages/admin/users"));
 const AdminProducts     = lazy(() => import("@/pages/admin/products"));
 const AdminOrders       = lazy(() => import("@/pages/admin/orders"));
 const AdminSettings     = lazy(() => import("@/pages/admin/settings"));
+const AdminLogs         = lazy(() => import("@/pages/admin/logs"));
 
 setupApi();
 
@@ -105,6 +106,9 @@ function Router() {
           </Route>
           <Route path="/admin/orders">
             <ProtectedRoute allowedRoles={["admin"]}><AdminOrders /></ProtectedRoute>
+          </Route>
+          <Route path="/admin/logs">
+            <ProtectedRoute allowedRoles={["admin"]}><AdminLogs /></ProtectedRoute>
           </Route>
           <Route path="/admin/settings">
             <ProtectedRoute allowedRoles={["admin"]}><AdminSettings /></ProtectedRoute>

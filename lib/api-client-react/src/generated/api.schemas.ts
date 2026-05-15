@@ -5,6 +5,27 @@
  * Marketplace API
  * OpenAPI spec version: 0.1.0
  */
+export type AdminAuditLogEntryMetadata = { [key: string]: unknown } | null;
+
+export interface AdminAuditLogEntry {
+  id: number;
+  actorId: number;
+  actorName: string;
+  action: string;
+  targetType: string;
+  targetId?: string | null;
+  metadata?: AdminAuditLogEntryMetadata;
+  createdAt: string;
+}
+
+export interface AdminLogsPage {
+  data: AdminAuditLogEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -420,6 +441,11 @@ limit?: number;
 };
 
 export type AdminListOrdersParams = {
+page?: number;
+limit?: number;
+};
+
+export type AdminListLogsParams = {
 page?: number;
 limit?: number;
 };

@@ -773,6 +773,32 @@ export const AdminUpdateOrderStatusResponse = zod.object({
 
 
 /**
+ * @summary List admin audit log entries (admin only)
+ */
+export const AdminListLogsQueryParams = zod.object({
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const AdminListLogsResponse = zod.object({
+  "data": zod.array(zod.object({
+  "id": zod.number(),
+  "actorId": zod.number(),
+  "actorName": zod.string(),
+  "action": zod.string(),
+  "targetType": zod.string(),
+  "targetId": zod.string().nullish(),
+  "metadata": zod.record(zod.string(), zod.unknown()).nullish(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number(),
+  "totalPages": zod.number()
+})
+
+
+/**
  * @summary Get admin platform settings (admin only)
  */
 export const AdminGetSettingsResponse = zod.object({

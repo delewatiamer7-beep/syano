@@ -11,6 +11,7 @@ import {
   LogOut,
   Shield,
   ChevronRight,
+  ScrollText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/admin/users", icon: Users, labelKey: "admin.nav_users" },
   { href: "/admin/products", icon: Package, labelKey: "admin.nav_products" },
   { href: "/admin/orders", icon: ShoppingCart, labelKey: "admin.nav_orders" },
+  { href: "/admin/logs", icon: ScrollText, labelKey: "admin.nav_logs" },
   { href: "/admin/settings", icon: Settings, labelKey: "admin.nav_settings" },
 ];
 

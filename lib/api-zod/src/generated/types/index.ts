@@ -6,9 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './adminAuditLogEntry';
+export * from './adminAuditLogEntryMetadata';
+export * from './adminListLogsParams';
 export * from './adminListOrdersParams';
 export * from './adminListProductsParams';
 export * from './adminListUsersParams';
+export * from './adminLogsPage';
 export * from './adminOrder';
 export * from './adminOrderItem';
 export * from './adminOrderStatus';
