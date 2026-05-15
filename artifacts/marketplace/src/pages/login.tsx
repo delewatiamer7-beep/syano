@@ -55,43 +55,43 @@ export default function Login() {
 
   return (
     <Layout>
-      <div className="container flex-1 flex items-center justify-center max-w-lg mx-auto py-12">
-        <div className="w-full bg-card border border-border p-8 rounded-xl shadow-sm">
+      <div className="container flex-1 flex items-center justify-center py-12 md:py-16">
+        <div className="w-full max-w-md bg-card border border-border p-7 md:p-8 rounded-2xl shadow-sm">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground">{t("auth.welcome_back")}</h1>
-            <p className="text-muted-foreground mt-2">{t("auth.login_subtitle")}</p>
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">{t("auth.welcome_back")}</h1>
+            <p className="text-muted-foreground mt-2 leading-relaxed">{t("auth.login_subtitle")}</p>
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
                 control={form.control}
                 name="role"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
-                    <FormLabel>{t("auth.i_am_a")}</FormLabel>
+                    <FormLabel className="text-sm font-semibold">{t("auth.i_am_a")}</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        className="grid grid-cols-2 gap-4"
+                        className="grid grid-cols-2 gap-3"
                       >
                         <FormItem>
                           <FormControl>
                             <RadioGroupItem value="customer" className="peer sr-only" />
                           </FormControl>
-                          <FormLabel className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer">
-                            <UserCircle2 className="mb-2 h-6 w-6" />
-                            {t("auth.customer")}
+                          <FormLabel className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-colors min-h-[80px]">
+                            <UserCircle2 className="h-6 w-6" />
+                            <span className="text-sm font-medium">{t("auth.customer")}</span>
                           </FormLabel>
                         </FormItem>
                         <FormItem>
                           <FormControl>
                             <RadioGroupItem value="seller" className="peer sr-only" />
                           </FormControl>
-                          <FormLabel className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer">
-                            <Store className="mb-2 h-6 w-6" />
-                            {t("auth.seller")}
+                          <FormLabel className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-colors min-h-[80px]">
+                            <Store className="h-6 w-6" />
+                            <span className="text-sm font-medium">{t("auth.seller")}</span>
                           </FormLabel>
                         </FormItem>
                       </RadioGroup>
@@ -101,7 +101,7 @@ export default function Login() {
                 )}
               />
 
-              <div className="space-y-4">
+              <div className="space-y-4 pt-1">
                 <FormField
                   control={form.control}
                   name="email"
@@ -131,7 +131,7 @@ export default function Login() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+              <Button type="submit" className="w-full h-11 text-sm font-semibold mt-2" disabled={loginMutation.isPending}>
                 {loginMutation.isPending ? t("auth.logging_in") : t("auth.login_btn")}
               </Button>
             </form>
@@ -139,7 +139,7 @@ export default function Login() {
 
           <div className="mt-6 text-center text-sm">
             <span className="text-muted-foreground">{t("auth.no_account")} </span>
-            <Link href="/register" className="text-primary hover:underline font-medium">
+            <Link href="/register" className="text-primary hover:underline font-semibold">
               {t("auth.signup_link")}
             </Link>
           </div>

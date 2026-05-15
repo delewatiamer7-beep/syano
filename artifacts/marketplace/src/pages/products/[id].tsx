@@ -56,8 +56,8 @@ export default function ProductDetail() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="container py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="container py-8 md:py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
             <div className="aspect-square bg-muted rounded-2xl animate-pulse" />
             <div className="space-y-6">
               <div className="h-8 bg-muted rounded w-3/4 animate-pulse" />
@@ -89,13 +89,13 @@ export default function ProductDetail() {
 
   return (
     <Layout>
-      <div className="container py-8">
-        <Link href="/products" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
-          <ChevronLeft className="h-4 w-4 me-1" />
+      <div className="container py-8 md:py-12">
+        <Link href="/products" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors gap-0.5">
+          <ChevronLeft className="h-4 w-4" />
           {t("product_detail.back")}
         </Link>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
           {/* Image */}
           <div className="flex flex-col space-y-4">
             <div className="aspect-square bg-card border rounded-2xl overflow-hidden relative flex items-center justify-center shadow-sm">
@@ -114,26 +114,26 @@ export default function ProductDetail() {
 
           {/* Info */}
           <div className="flex flex-col">
-            <div className="mb-2 uppercase tracking-wider text-sm font-semibold text-primary">
+            <div className="mb-2 uppercase tracking-widest text-xs font-bold text-primary">
               {product.category}
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-3">
               {product.name}
             </h1>
 
-            <div className="text-muted-foreground mb-6 font-medium">
-              {t("product_detail.sold_by")} <span className="text-foreground">{product.sellerName}</span>
+            <div className="text-muted-foreground mb-5 font-medium text-sm">
+              {t("product_detail.sold_by")} <span className="text-foreground font-semibold">{product.sellerName}</span>
             </div>
 
-            <div className="flex items-end gap-3 mb-8">
+            <div className="flex items-end gap-3 mb-7">
               {hasDiscount ? (
                 <>
-                  <span className="text-4xl font-bold text-foreground">{format(product.finalPrice)}</span>
-                  <span className="text-xl text-muted-foreground line-through pb-1">{format(product.price)}</span>
+                  <span className="text-4xl font-bold text-foreground leading-none">{format(product.finalPrice)}</span>
+                  <span className="text-xl text-muted-foreground line-through pb-0.5">{format(product.price)}</span>
                 </>
               ) : (
-                <span className="text-4xl font-bold text-foreground">{format(product.price)}</span>
+                <span className="text-4xl font-bold text-foreground leading-none">{format(product.price)}</span>
               )}
             </div>
 
@@ -142,16 +142,16 @@ export default function ProductDetail() {
             </p>
 
             {/* Actions */}
-            <div className="space-y-6 bg-card border rounded-xl p-6 shadow-sm mb-8">
+            <div className="space-y-5 bg-card border rounded-xl p-6 shadow-sm mb-8">
               <div className="flex items-center justify-between">
-                <span className="font-medium">{t("product_detail.availability")}</span>
+                <span className="font-medium text-sm">{t("product_detail.availability")}</span>
                 {product.stock > 0 ? (
-                  <span className="text-primary font-medium flex items-center gap-2">
+                  <span className="text-primary font-semibold text-sm flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-primary" />
                     {t("product_detail.in_stock", { count: product.stock })}
                   </span>
                 ) : (
-                  <span className="text-destructive font-medium flex items-center gap-2">
+                  <span className="text-destructive font-semibold text-sm flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-destructive" />
                     {t("product_detail.out_of_stock")}
                   </span>
@@ -160,17 +160,17 @@ export default function ProductDetail() {
 
               {product.stock > 0 && (
                 <div className="flex items-center gap-4 pt-4 border-t">
-                  <div className="flex items-center border rounded-md h-12 w-32">
+                  <div className="flex items-center border rounded-lg h-12 w-32 overflow-hidden">
                     <button
-                      className="flex-1 flex items-center justify-center hover:bg-muted/50 transition-colors h-full text-muted-foreground hover:text-foreground disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center hover:bg-muted/50 transition-colors h-full text-muted-foreground hover:text-foreground disabled:opacity-40"
                       onClick={decreaseQuantity}
                       disabled={quantity <= 1}
                     >
                       <Minus className="h-4 w-4" />
                     </button>
-                    <span className="flex-1 text-center font-medium">{quantity}</span>
+                    <span className="flex-1 text-center font-semibold">{quantity}</span>
                     <button
-                      className="flex-1 flex items-center justify-center hover:bg-muted/50 transition-colors h-full text-muted-foreground hover:text-foreground disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center hover:bg-muted/50 transition-colors h-full text-muted-foreground hover:text-foreground disabled:opacity-40"
                       onClick={increaseQuantity}
                       disabled={quantity >= product.stock}
                     >
@@ -180,7 +180,7 @@ export default function ProductDetail() {
 
                   {isCustomer ? (
                     <Button
-                      className="flex-1 h-12 text-base font-medium shadow-sm hover:shadow"
+                      className="flex-1 h-12 text-base font-semibold shadow-sm hover:shadow"
                       onClick={handleAddToCart}
                       disabled={addToCart.isPending}
                     >
@@ -189,12 +189,12 @@ export default function ProductDetail() {
                     </Button>
                   ) : !isAuthenticated ? (
                     <Link href={`/login?redirect=/products/${product.id}`} className="flex-1">
-                      <Button className="w-full h-12 text-base font-medium shadow-sm">
+                      <Button className="w-full h-12 text-base font-semibold shadow-sm">
                         {t("product_detail.login_to_buy")}
                       </Button>
                     </Link>
                   ) : (
-                    <Button className="flex-1 h-12 text-base font-medium" disabled>
+                    <Button className="flex-1 h-12 text-base font-semibold" disabled>
                       {t("product_detail.sellers_cannot_buy")}
                     </Button>
                   )}
@@ -203,21 +203,27 @@ export default function ProductDetail() {
             </div>
 
             {/* Guarantees */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t">
-              <div className="flex flex-col items-center text-center p-4 bg-muted/30 rounded-lg">
-                <Truck className="h-6 w-6 text-primary mb-2" />
-                <span className="text-sm font-medium">{t("product_detail.fast_shipping")}</span>
-                <span className="text-xs text-muted-foreground mt-1">{t("product_detail.fast_shipping_desc")}</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t">
+              <div className="flex flex-col items-center text-center p-4 bg-muted/30 rounded-xl gap-2">
+                <Truck className="h-6 w-6 text-primary shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold leading-tight">{t("product_detail.fast_shipping")}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{t("product_detail.fast_shipping_desc")}</p>
+                </div>
               </div>
-              <div className="flex flex-col items-center text-center p-4 bg-muted/30 rounded-lg">
-                <ShieldCheck className="h-6 w-6 text-primary mb-2" />
-                <span className="text-sm font-medium">{t("product_detail.secure_payment")}</span>
-                <span className="text-xs text-muted-foreground mt-1">{t("product_detail.secure_payment_desc")}</span>
+              <div className="flex flex-col items-center text-center p-4 bg-muted/30 rounded-xl gap-2">
+                <ShieldCheck className="h-6 w-6 text-primary shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold leading-tight">{t("product_detail.secure_payment")}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{t("product_detail.secure_payment_desc")}</p>
+                </div>
               </div>
-              <div className="flex flex-col items-center text-center p-4 bg-muted/30 rounded-lg">
-                <RefreshCw className="h-6 w-6 text-primary mb-2" />
-                <span className="text-sm font-medium">{t("product_detail.easy_returns")}</span>
-                <span className="text-xs text-muted-foreground mt-1">{t("product_detail.easy_returns_desc")}</span>
+              <div className="flex flex-col items-center text-center p-4 bg-muted/30 rounded-xl gap-2">
+                <RefreshCw className="h-6 w-6 text-primary shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold leading-tight">{t("product_detail.easy_returns")}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{t("product_detail.easy_returns_desc")}</p>
+                </div>
               </div>
             </div>
           </div>

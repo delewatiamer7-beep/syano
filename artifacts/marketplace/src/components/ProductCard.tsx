@@ -51,14 +51,14 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      className="group flex flex-col bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-all cursor-pointer h-full relative"
+      className="group flex flex-col bg-card rounded-xl border border-border overflow-hidden hover:shadow-md hover:border-border/80 transition-all duration-200 cursor-pointer h-full relative"
       onClick={() => navigate(`/products/${product.id}`)}
       role="link"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && navigate(`/products/${product.id}`)}
     >
       {hasDiscount && (
-        <Badge className="absolute top-3 end-3 z-10 bg-primary hover:bg-primary text-primary-foreground font-bold px-2 py-1">
+        <Badge className="absolute top-3 end-3 z-10 bg-primary hover:bg-primary text-primary-foreground font-bold px-2 py-0.5 text-xs">
           {product.discountPercent}% {t("products.off")}
         </Badge>
       )}
@@ -77,30 +77,30 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
 
-      <div className="p-5 flex flex-col flex-1">
-        <div className="text-xs font-medium text-muted-foreground mb-1 uppercase tracking-wider">
+      <div className="p-5 flex flex-col flex-1 gap-1">
+        <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
           {product.category}
         </div>
-        <h3 className="font-semibold text-lg text-foreground line-clamp-1 mb-1 group-hover:text-primary transition-colors">
+        <h3 className="font-semibold text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-snug">
           {product.name}
         </h3>
-        <p className="text-sm text-muted-foreground line-clamp-1 mb-4">
+        <p className="text-sm text-muted-foreground line-clamp-1 mb-auto pb-3">
           {t("common.by")} {product.sellerName}
         </p>
 
-        <div className="mt-auto flex items-end justify-between">
-          <div className="flex flex-col">
+        <div className="flex items-end justify-between pt-3 border-t border-border/60">
+          <div className="flex flex-col gap-0.5">
             {hasDiscount ? (
               <>
-                <span className="text-sm text-muted-foreground line-through">
+                <span className="text-xs text-muted-foreground line-through leading-none">
                   {format(product.price)}
                 </span>
-                <span className="font-bold text-xl text-foreground">
+                <span className="font-bold text-xl text-foreground leading-tight">
                   {format(product.finalPrice)}
                 </span>
               </>
             ) : (
-              <span className="font-bold text-xl text-foreground">
+              <span className="font-bold text-xl text-foreground leading-tight">
                 {format(product.price)}
               </span>
             )}
@@ -110,11 +110,11 @@ export function ProductCard({ product }: ProductCardProps) {
             <Button
               size="icon"
               variant="secondary"
-              className="h-10 w-10 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+              className="h-10 w-10 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground shrink-0"
               onClick={handleAddToCart}
               disabled={addToCart.isPending || product.stock <= 0}
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className="h-4 w-4" />
               <span className="sr-only">{t("product_detail.add_to_cart")}</span>
             </Button>
           )}
@@ -124,21 +124,21 @@ export function ProductCard({ product }: ProductCardProps) {
               <Button
                 size="icon"
                 variant="secondary"
-                className="h-10 w-10 rounded-full"
+                className="h-10 w-10 rounded-full shrink-0"
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="h-4 w-4" />
               </Button>
             </Link>
           )}
         </div>
 
         {product.stock <= 5 && product.stock > 0 && (
-          <div className="mt-3 text-xs font-medium text-destructive">
+          <div className="mt-2 text-xs font-medium text-destructive">
             {t("products.only_left", { count: product.stock })}
           </div>
         )}
         {product.stock <= 0 && (
-          <div className="mt-3 text-xs font-medium text-muted-foreground">
+          <div className="mt-2 text-xs font-medium text-muted-foreground">
             {t("products.out_of_stock")}
           </div>
         )}

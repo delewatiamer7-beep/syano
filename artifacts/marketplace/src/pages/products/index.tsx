@@ -72,16 +72,16 @@ export default function Products() {
     <Layout>
       <div className="container py-8 md:py-12">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t("products.title")}</h1>
-            <p className="text-muted-foreground mt-1">{t("products.subtitle")}</p>
+            <p className="text-muted-foreground mt-1.5">{t("products.subtitle")}</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row w-full md:w-auto items-center gap-3">
+          <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3">
             {/* Search */}
             <div className="relative w-full sm:w-[280px]">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 placeholder={t("products.search_placeholder")}
                 className="ps-9 pe-8 w-full"
@@ -103,7 +103,7 @@ export default function Products() {
               <Select value={category || "all"} onValueChange={(val) => setCategory(val)}>
                 <SelectTrigger>
                   <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+                    <SlidersHorizontal className="h-4 w-4 text-muted-foreground shrink-0" />
                     <SelectValue placeholder={t("products.all_categories")} />
                   </div>
                 </SelectTrigger>
@@ -135,47 +135,47 @@ export default function Products() {
               variant="outline"
               size="sm"
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className={filtersOpen ? "border-primary text-primary" : ""}
+              className={`h-10 px-3 shrink-0 ${filtersOpen ? "border-primary text-primary" : ""}`}
             >
               <SlidersHorizontal className="h-4 w-4 me-1.5" />
               {t("products.filters")}
-              <ChevronDown className={`h-3.5 w-3.5 ms-1 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
+              <ChevronDown className={`h-3.5 w-3.5 ms-1.5 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
             </Button>
           </div>
         </div>
 
         {/* Advanced filters panel */}
         {filtersOpen && (
-          <div className="mb-6 p-4 bg-muted/30 border rounded-xl flex flex-wrap gap-4 items-end">
-            <div className="flex flex-col gap-1.5 min-w-[120px]">
-              <Label className="text-xs font-medium text-muted-foreground">{priceLabel}</Label>
+          <div className="mb-6 p-5 bg-muted/30 border rounded-xl flex flex-wrap gap-5 items-end">
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{priceLabel}</Label>
               <Input
                 type="number"
                 min="0"
                 placeholder="0"
                 value={minPriceInput}
                 onChange={(e) => setMinPriceInput(e.target.value)}
-                className="h-9 w-[120px]"
+                className="h-9 w-[130px]"
               />
             </div>
-            <div className="flex flex-col gap-1.5 min-w-[120px]">
-              <Label className="text-xs font-medium text-muted-foreground">{maxPriceLabel}</Label>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{maxPriceLabel}</Label>
               <Input
                 type="number"
                 min="0"
                 placeholder="∞"
                 value={maxPriceInput}
                 onChange={(e) => setMaxPriceInput(e.target.value)}
-                className="h-9 w-[120px]"
+                className="h-9 w-[130px]"
               />
             </div>
-            <div className="flex items-center gap-2 pb-1">
+            <div className="flex items-center gap-2.5 pb-0.5">
               <Checkbox
                 id="on-sale"
                 checked={hasDiscount}
                 onCheckedChange={(v) => setHasDiscount(!!v)}
               />
-              <Label htmlFor="on-sale" className="cursor-pointer text-sm font-medium">
+              <Label htmlFor="on-sale" className="cursor-pointer text-sm font-medium leading-none">
                 {t("products.on_sale")}
               </Label>
             </div>
@@ -184,9 +184,9 @@ export default function Products() {
 
         {/* Clear filters */}
         {hasActiveFilters && (
-          <div className="mb-4">
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
-              <X className="h-3.5 w-3.5 me-1" />
+          <div className="mb-5">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground hover:text-foreground h-8 px-2">
+              <X className="h-3.5 w-3.5 me-1.5" />
               {t("products.clear_filters")}
             </Button>
           </div>
@@ -194,7 +194,7 @@ export default function Products() {
 
         {/* Results */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
             {Array(8).fill(0).map((_, i) => (
               <div key={i} className="flex flex-col space-y-4">
                 <div className="aspect-square bg-muted rounded-xl animate-pulse" />
@@ -213,7 +213,7 @@ export default function Products() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
             {products?.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

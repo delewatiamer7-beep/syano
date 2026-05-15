@@ -47,9 +47,9 @@ export default function Cart() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="container py-12">
+        <div className="container py-8 md:py-12 max-w-6xl">
           <div className="h-8 w-48 bg-muted rounded animate-pulse mb-8" />
-          <div className="flex flex-col lg:flex-row gap-12">
+          <div className="flex flex-col lg:flex-row gap-10">
             <div className="flex-1 space-y-4">
               {[1, 2].map(i => (
                 <div key={i} className="h-32 bg-muted rounded-xl animate-pulse" />
@@ -75,20 +75,20 @@ export default function Cart() {
               <ShoppingBag className="h-10 w-10 text-primary" />
             </div>
             <h2 className="text-2xl font-bold mb-2">{t("cart.empty")}</h2>
-            <p className="text-muted-foreground mb-8 max-w-md">{t("cart.empty_desc")}</p>
+            <p className="text-muted-foreground mb-8 max-w-md leading-relaxed">{t("cart.empty_desc")}</p>
             <Link href="/products">
               <Button size="lg" className="h-12 px-8">{t("cart.start_shopping")}</Button>
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-12 items-start">
-            <div className="flex-1 w-full space-y-6">
+          <div className="flex flex-col lg:flex-row gap-8 xl:gap-12 items-start">
+            <div className="flex-1 w-full space-y-4">
               <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
-                <div className="p-6 space-y-6">
+                <div className="divide-y">
                   {cart.items.map((item) => (
-                    <div key={item.productId} className="flex flex-col sm:flex-row gap-6 pb-6 border-b last:border-0 last:pb-0">
+                    <div key={item.productId} className="flex flex-col sm:flex-row gap-5 p-5 sm:p-6">
                       <Link href={`/products/${item.productId}`} className="shrink-0">
-                        <div className="h-24 w-24 sm:h-32 sm:w-32 bg-muted rounded-lg overflow-hidden border">
+                        <div className="h-24 w-24 sm:h-28 sm:w-28 bg-muted rounded-lg overflow-hidden border">
                           {item.product.imageUrl ? (
                             <img src={item.product.imageUrl} alt={item.product.name} className="h-full w-full object-cover" />
                           ) : (
@@ -99,40 +99,40 @@ export default function Cart() {
                         </div>
                       </Link>
 
-                      <div className="flex-1 flex flex-col justify-between">
+                      <div className="flex-1 flex flex-col justify-between gap-3">
                         <div className="flex justify-between gap-4">
                           <div>
                             <Link href={`/products/${item.productId}`}>
-                              <h3 className="font-semibold text-lg hover:text-primary transition-colors line-clamp-1">{item.product.name}</h3>
+                              <h3 className="font-semibold text-base hover:text-primary transition-colors line-clamp-1 leading-snug">{item.product.name}</h3>
                             </Link>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground mt-0.5">
                               {t("cart.sold_by")} {item.product.sellerName}
                             </p>
                           </div>
                           <div className="text-right shrink-0">
                             {item.product.discountPercent && item.product.discountPercent > 0 ? (
                               <>
-                                <div className="font-bold text-lg">{format(item.product.finalPrice)}</div>
-                                <div className="text-sm text-muted-foreground line-through">{format(item.product.price)}</div>
+                                <div className="font-bold text-base leading-tight">{format(item.product.finalPrice)}</div>
+                                <div className="text-xs text-muted-foreground line-through mt-0.5">{format(item.product.price)}</div>
                               </>
                             ) : (
-                              <div className="font-bold text-lg">{format(item.product.price)}</div>
+                              <div className="font-bold text-base">{format(item.product.price)}</div>
                             )}
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between mt-4">
-                          <div className="flex items-center border rounded-md h-9">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center border rounded-md h-9 overflow-hidden">
                             <button
-                              className="px-3 hover:bg-muted/50 h-full text-muted-foreground hover:text-foreground transition-colors"
+                              className="px-3 hover:bg-muted/50 h-full text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
                               onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
                               disabled={updateItem.isPending}
                             >
                               <Minus className="h-3 w-3" />
                             </button>
-                            <span className="px-2 font-medium text-sm w-8 text-center">{item.quantity}</span>
+                            <span className="px-3 font-semibold text-sm w-10 text-center">{item.quantity}</span>
                             <button
-                              className="px-3 hover:bg-muted/50 h-full text-muted-foreground hover:text-foreground transition-colors"
+                              className="px-3 hover:bg-muted/50 h-full text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
                               onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
                               disabled={updateItem.isPending || item.quantity >= item.product.stock}
                             >
@@ -143,7 +143,7 @@ export default function Cart() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            className="h-9 px-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             onClick={() => handleRemove(item.productId)}
                             disabled={removeItem.isPending}
                           >
@@ -161,10 +161,10 @@ export default function Cart() {
             <div className="w-full lg:w-96 bg-card border rounded-xl p-6 shadow-sm sticky top-24">
               <h3 className="text-xl font-bold mb-6">{t("cart.order_summary")}</h3>
 
-              <div className="space-y-4 mb-6 text-sm">
+              <div className="space-y-3 mb-6 text-sm">
                 <div className="flex justify-between text-muted-foreground">
                   <span>{t("cart.subtotal", { count: cart.itemCount })}</span>
-                  <span>{format(cart.total)}</span>
+                  <span className="font-medium text-foreground">{format(cart.total)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{t("cart.shipping")}</span>
@@ -174,7 +174,7 @@ export default function Cart() {
                   <span>{t("cart.tax")}</span>
                   <span>{t("cart.tax_calc")}</span>
                 </div>
-                <div className="border-t pt-4 flex justify-between font-bold text-lg">
+                <div className="border-t pt-4 mt-2 flex justify-between font-bold text-lg">
                   <span>{t("cart.total")}</span>
                   <span>{format(cart.total)}</span>
                 </div>

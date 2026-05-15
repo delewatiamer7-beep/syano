@@ -94,15 +94,15 @@ export default function EditProduct() {
 
   return (
     <Layout>
-      <div className="container py-8 max-w-2xl">
-        <Link href="/seller/products" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
-          <BackIcon className="h-4 w-4 me-1" />
+      <div className="container py-8 md:py-12 max-w-2xl">
+        <Link href="/seller/products" className="inline-flex items-center gap-0.5 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
+          <BackIcon className="h-4 w-4" />
           {t("seller_products.back")}
         </Link>
 
         <h1 className="text-3xl font-bold tracking-tight mb-8">{t("seller_products.edit_title")}</h1>
 
-        <div className="bg-card border rounded-xl p-6 shadow-sm">
+        <div className="bg-card border rounded-xl p-6 md:p-8 shadow-sm">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -119,7 +119,7 @@ export default function EditProduct() {
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormField
                   control={form.control}
                   name="price"
@@ -137,7 +137,7 @@ export default function EditProduct() {
                 <div className="space-y-2">
                   <FormLabel className="text-muted-foreground">{t("seller_products.stock_col")}</FormLabel>
                   <div className="h-10 px-3 py-2 border rounded-md bg-muted/30 text-muted-foreground flex items-center gap-2">
-                    <span className="font-medium text-foreground">{product?.stock}</span>
+                    <span className="font-semibold text-foreground">{product?.stock}</span>
                     <span className="text-xs">{t("seller_products.stock_managed")}</span>
                   </div>
                 </div>
@@ -164,7 +164,7 @@ export default function EditProduct() {
                   <FormItem>
                     <FormLabel>{t("seller_products.description")}</FormLabel>
                     <FormControl>
-                      <Textarea className="min-h-[120px]" {...field} />
+                      <Textarea className="min-h-[120px] leading-relaxed" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -185,7 +185,7 @@ export default function EditProduct() {
                 )}
               />
 
-              <div className="flex justify-end pt-4 border-t gap-4">
+              <div className="flex justify-end pt-5 border-t gap-3">
                 <Link href="/seller/products">
                   <Button variant="outline" type="button">{t("seller_products.cancel_btn")}</Button>
                 </Link>
