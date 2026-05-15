@@ -47,7 +47,7 @@ export default function RegisterScreen() {
         onSuccess: async (data) => {
           await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           await login(data);
-          router.replace("/(tabs)/");
+          router.replace("/(tabs)");
         },
         onError: (err: unknown) => {
           void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

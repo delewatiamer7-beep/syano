@@ -159,7 +159,7 @@ function CartScreen() {
               styles.browseBtn,
               { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
             ]}
-            onPress={() => router.push("/(tabs)/")}
+            onPress={() => router.push("/(tabs)")}
           >
             <Text style={[styles.browseBtnText, { color: colors.primaryForeground }]}>
               Browse Shop

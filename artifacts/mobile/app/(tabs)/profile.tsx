@@ -12,7 +12,12 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useGetCustomerDashboard, useGetSellerDashboard } from "@workspace/api-client-react";
+import {
+  useGetCustomerDashboard,
+  useGetSellerDashboard,
+  getGetCustomerDashboardQueryKey,
+  getGetSellerDashboardQueryKey,
+} from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColors } from "@/hooks/useColors";
 
@@ -21,8 +26,8 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout, isSeller, isCustomer } = useAuth();
 
-  const customerDash = useGetCustomerDashboard({ query: { enabled: isCustomer } });
-  const sellerDash = useGetSellerDashboard({ query: { enabled: isSeller } });
+  const customerDash = useGetCustomerDashboard({ query: { enabled: isCustomer, queryKey: getGetCustomerDashboardQueryKey() } });
+  const sellerDash = useGetSellerDashboard({ query: { enabled: isSeller, queryKey: getGetSellerDashboardQueryKey() } });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -142,7 +147,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="analytics-outline"
             label="Dashboard"
-            onPress={() => router.push("/(tabs)/")}
+            onPress={() => router.push("/(tabs)")}
             colors={colors}
           />
         )}
