@@ -131,7 +131,7 @@ export default function AdminUsers() {
                         size="icon" variant="ghost"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={() => setDeleteTarget(user)}
-                        disabled={user.role === "admin"}
+                        disabled={false}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

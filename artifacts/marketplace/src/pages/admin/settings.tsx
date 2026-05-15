@@ -4,6 +4,7 @@ import {
   useAdminGetSettings,
   useAdminUpdateSettings,
   getAdminGetSettingsQueryKey,
+  getGetPublicSettingsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -30,6 +31,7 @@ export default function AdminSettings() {
       onSuccess: () => {
         toast({ title: t("admin.settings_saved") });
         queryClient.invalidateQueries({ queryKey: getAdminGetSettingsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetPublicSettingsQueryKey() });
       },
       onError: (err: Error) =>
         toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
