@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { eq, count, sum, desc } from "drizzle-orm";
-import { db, usersTable, productsTable, ordersTable, orderItemsTable, platformSettingsTable } from "@workspace/db";
+import { eq, count, sum, desc, inArray } from "drizzle-orm";
+import { db, usersTable, productsTable, ordersTable, orderItemsTable, cartItemsTable, platformSettingsTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -111,7 +111,39 @@ router.delete("/admin/users/:id", async (req, res): Promise<void> => {
   const [existing] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, id));
   if (!existing) { res.status(404).json({ error: "User not found" }); return; }
 
-  await db.delete(usersTable).where(eq(usersTable.id, id));
+  // Cascade-delete in FK-safe order inside a transaction
+  await db.transaction(async (tx) => {
+    // 1. Delete cart_items belonging to this user
+    await tx.delete(cartItemsTable).where(eq(cartItemsTable.userId, id));
+
+    // 2. Find all products this seller owns, then remove them from other users' carts
+    const sellerProducts = await tx
+      .select({ id: productsTable.id })
+      .from(productsTable)
+      .where(eq(productsTable.sellerId, id));
+
+    if (sellerProducts.length > 0) {
+      const productIds = sellerProducts.map((p) => p.id);
+      await tx.delete(cartItemsTable).where(inArray(cartItemsTable.productId, productIds));
+      await tx.delete(productsTable).where(eq(productsTable.sellerId, id));
+    }
+
+    // 3. Find orders placed by this customer, delete their items, then the orders
+    const customerOrders = await tx
+      .select({ id: ordersTable.id })
+      .from(ordersTable)
+      .where(eq(ordersTable.customerId, id));
+
+    if (customerOrders.length > 0) {
+      const orderIds = customerOrders.map((o) => o.id);
+      await tx.delete(orderItemsTable).where(inArray(orderItemsTable.orderId, orderIds));
+      await tx.delete(ordersTable).where(eq(ordersTable.customerId, id));
+    }
+
+    // 4. Delete the user
+    await tx.delete(usersTable).where(eq(usersTable.id, id));
+  });
+
   res.json({ message: "User deleted" });
 });
 

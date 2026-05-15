@@ -1,9 +1,8 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
+import { useGetPublicSettings } from "@workspace/api-client-react";
 
 type Currency = "USD" | "SYP";
-
 const DEFAULT_RATE = 14500;
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 interface CurrencyContextValue {
   currency: Currency;
@@ -20,18 +19,11 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     const saved = localStorage.getItem("marketplace_currency");
     return (saved === "SYP" || saved === "USD") ? saved : "USD";
   });
-  const [exchangeRate, setExchangeRate] = useState(DEFAULT_RATE);
 
-  useEffect(() => {
-    fetch(`${BASE}/api/settings`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (typeof data.exchangeRate === "number" && data.exchangeRate > 0) {
-          setExchangeRate(data.exchangeRate);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const { data: settings } = useGetPublicSettings();
+  const exchangeRate = (settings?.exchangeRate && settings.exchangeRate > 0)
+    ? settings.exchangeRate
+    : DEFAULT_RATE;
 
   const setCurrency = useCallback((c: Currency) => {
     localStorage.setItem("marketplace_currency", c);

@@ -1,7 +1,14 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/AdminLayout";
-import { adminApi, type AdminProduct } from "@/lib/adminApi";
+import {
+  useAdminListProducts,
+  useAdminUpdateProduct,
+  useAdminDeleteProduct,
+  getAdminListProductsQueryKey,
+  getAdminGetStatsQueryKey,
+  type AdminProduct,
+} from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Button } from "@/components/ui/button";
@@ -40,35 +47,35 @@ export default function AdminProducts() {
   const [deleteTarget, setDeleteTarget] = useState<AdminProduct | null>(null);
   const [editForm, setEditForm] = useState<EditForm>({ name: "", price: "", stock: "", discountPercent: "", category: "" });
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin", "products", page],
-    queryFn: () => adminApi.getProducts(page, PAGE_SIZE),
-  });
+  const { data, isLoading } = useAdminListProducts({ page, limit: PAGE_SIZE });
 
   const products = data?.data ?? [];
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, updateData }: { id: number; updateData: Partial<AdminProduct> }) =>
-      adminApi.updateProduct(id, updateData),
-    onSuccess: () => {
-      toast({ title: t("admin.product_updated") });
-      queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
-      setEditTarget(null);
+  const updateMutation = useAdminUpdateProduct({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: t("admin.product_updated") });
+        queryClient.invalidateQueries({ queryKey: getAdminListProductsQueryKey() });
+        setEditTarget(null);
+      },
+      onError: (err: Error) =>
+        toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
     },
-    onError: (err: Error) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => adminApi.deleteProduct(id),
-    onSuccess: () => {
-      toast({ title: t("admin.product_deleted") });
-      queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
-      setDeleteTarget(null);
+  const deleteMutation = useAdminDeleteProduct({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: t("admin.product_deleted") });
+        queryClient.invalidateQueries({ queryKey: getAdminListProductsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getAdminGetStatsQueryKey() });
+        setDeleteTarget(null);
+      },
+      onError: (err: Error) =>
+        toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
     },
-    onError: (err: Error) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
   });
 
   const openEdit = (p: AdminProduct) => {
@@ -86,7 +93,7 @@ export default function AdminProducts() {
     if (!editTarget) return;
     updateMutation.mutate({
       id: editTarget.id,
-      updateData: {
+      data: {
         name: editForm.name,
         price: parseFloat(editForm.price),
         stock: parseInt(editForm.stock, 10),
@@ -258,7 +265,8 @@ export default function AdminProducts() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("seller_products.cancel")}</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteTarget && deleteMutation.mutate({ id: deleteTarget.id })}>
               {t("seller_products.confirm_delete")}
             </AlertDialogAction>
           </AlertDialogFooter>

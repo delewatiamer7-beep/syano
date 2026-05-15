@@ -120,8 +120,8 @@ function Router() {
 function App() {
   return (
     <ThemeProvider defaultTheme="system" attribute="class">
-      <CurrencyProvider>
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <CurrencyProvider>
           <AuthProvider>
             <TooltipProvider>
               <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
@@ -130,8 +130,8 @@ function App() {
               <Toaster />
             </TooltipProvider>
           </AuthProvider>
-        </QueryClientProvider>
-      </CurrencyProvider>
+        </CurrencyProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

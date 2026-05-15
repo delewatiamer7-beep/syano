@@ -230,6 +230,145 @@ export interface CustomerDashboard {
   recentOrders: Order[];
 }
 
+export interface PublicSettings {
+  exchangeRate: number;
+}
+
+export interface AdminSettings {
+  exchangeRate: number;
+}
+
+export type AdminUserRole = typeof AdminUserRole[keyof typeof AdminUserRole];
+
+
+export const AdminUserRole = {
+  customer: 'customer',
+  seller: 'seller',
+  admin: 'admin',
+} as const;
+
+export interface AdminUser {
+  id: number;
+  name: string;
+  email: string;
+  role: AdminUserRole;
+  createdAt: string;
+}
+
+export interface AdminProduct {
+  id: number;
+  sellerId: number;
+  sellerName: string;
+  name: string;
+  description: string;
+  price: number;
+  /** @nullable */
+  discountPercent: number | null;
+  category: string;
+  stock: number;
+  /** @nullable */
+  imageUrl: string | null;
+  createdAt: string;
+}
+
+export interface AdminProductUpdate {
+  name?: string;
+  description?: string;
+  price?: number;
+  category?: string;
+  stock?: number;
+  /** @nullable */
+  discountPercent?: number | null;
+  /** @nullable */
+  imageUrl?: string | null;
+}
+
+export interface AdminOrderItem {
+  productId: number;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
+
+export type AdminOrderStatus = typeof AdminOrderStatus[keyof typeof AdminOrderStatus];
+
+
+export const AdminOrderStatus = {
+  pending: 'pending',
+  processing: 'processing',
+  shipped: 'shipped',
+  delivered: 'delivered',
+  cancelled: 'cancelled',
+} as const;
+
+export interface AdminOrder {
+  id: number;
+  customerId: number;
+  customerName: string;
+  customerEmail: string;
+  total: number;
+  status: AdminOrderStatus;
+  shippingAddress: string;
+  items: AdminOrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AdminOrderSummaryStatus = typeof AdminOrderSummaryStatus[keyof typeof AdminOrderSummaryStatus];
+
+
+export const AdminOrderSummaryStatus = {
+  pending: 'pending',
+  processing: 'processing',
+  shipped: 'shipped',
+  delivered: 'delivered',
+  cancelled: 'cancelled',
+} as const;
+
+export interface AdminOrderSummary {
+  id: number;
+  customerId: number;
+  customerName: string;
+  customerEmail: string;
+  total: number;
+  status: AdminOrderSummaryStatus;
+  createdAt: string;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  totalProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+  ordersByStatus: StatusCount[];
+  recentOrders: AdminOrderSummary[];
+}
+
+export interface PaginatedAdminUsers {
+  data: AdminUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedAdminProducts {
+  data: AdminProduct[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedAdminOrders {
+  data: AdminOrder[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export type ListProductsParams = {
 /**
  * @nullable
@@ -269,4 +408,19 @@ export const ListProductsSortBy = {
   price_asc: 'price_asc',
   price_desc: 'price_desc',
 } as const;
+
+export type AdminListUsersParams = {
+page?: number;
+limit?: number;
+};
+
+export type AdminListProductsParams = {
+page?: number;
+limit?: number;
+};
+
+export type AdminListOrdersParams = {
+page?: number;
+limit?: number;
+};
 

@@ -1,7 +1,13 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/AdminLayout";
-import { adminApi, type AdminUser } from "@/lib/adminApi";
+import {
+  useAdminListUsers,
+  useAdminDeleteUser,
+  getAdminListUsersQueryKey,
+  getAdminGetStatsQueryKey,
+  type AdminUser,
+} from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,26 +35,24 @@ export default function AdminUsers() {
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin", "users", page],
-    queryFn: () => adminApi.getUsers(page, PAGE_SIZE),
-  });
+  const { data, isLoading } = useAdminListUsers({ page, limit: PAGE_SIZE });
 
   const users = data?.data ?? [];
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => adminApi.deleteUser(id),
-    onSuccess: () => {
-      toast({ title: t("admin.user_deleted") });
-      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
-      setDeleteTarget(null);
-    },
-    onError: (err: Error) => {
-      toast({ title: t("common.error"), description: err.message, variant: "destructive" });
-      setDeleteTarget(null);
+  const deleteMutation = useAdminDeleteUser({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: t("admin.user_deleted") });
+        queryClient.invalidateQueries({ queryKey: getAdminListUsersQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getAdminGetStatsQueryKey() });
+        setDeleteTarget(null);
+      },
+      onError: (err: Error) => {
+        toast({ title: t("common.error"), description: err.message, variant: "destructive" });
+        setDeleteTarget(null);
+      },
     },
   });
 
@@ -141,7 +145,6 @@ export default function AdminUsers() {
             </table>
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/20">
               <span className="text-sm text-muted-foreground">
@@ -170,7 +173,7 @@ export default function AdminUsers() {
             <AlertDialogCancel>{t("seller_products.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+              onClick={() => deleteTarget && deleteMutation.mutate({ id: deleteTarget.id })}
             >
               {t("seller_products.confirm_delete")}
             </AlertDialogAction>

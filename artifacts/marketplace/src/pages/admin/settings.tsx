@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/AdminLayout";
-import { adminApi } from "@/lib/adminApi";
+import {
+  useAdminGetSettings,
+  useAdminUpdateSettings,
+  getAdminGetSettingsQueryKey,
+} from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,21 +16,24 @@ import { Settings, RefreshCw } from "lucide-react";
 export default function AdminSettings() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [exchangeRate, setExchangeRate] = useState("");
 
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ["admin", "settings"],
-    queryFn: () => adminApi.getSettings(),
-  });
+  const { data: settings, isLoading } = useAdminGetSettings();
 
   useEffect(() => {
     if (settings?.exchangeRate) setExchangeRate(String(settings.exchangeRate));
   }, [settings]);
 
-  const updateMutation = useMutation({
-    mutationFn: () => adminApi.updateSettings({ exchangeRate: parseFloat(exchangeRate) }),
-    onSuccess: () => toast({ title: t("admin.settings_saved") }),
-    onError: (err: any) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
+  const updateMutation = useAdminUpdateSettings({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: t("admin.settings_saved") });
+        queryClient.invalidateQueries({ queryKey: getAdminGetSettingsQueryKey() });
+      },
+      onError: (err: Error) =>
+        toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
+    },
   });
 
   const usdPreview = 1;
@@ -43,7 +50,6 @@ export default function AdminSettings() {
         </div>
 
         <div className="max-w-lg space-y-6">
-          {/* Exchange Rate Card */}
           <div className="bg-card border border-border rounded-xl p-6">
             <h2 className="font-semibold text-foreground mb-1">{t("admin.exchange_rate_title")}</h2>
             <p className="text-sm text-muted-foreground mb-5">{t("admin.exchange_rate_desc")}</p>
@@ -69,7 +75,7 @@ export default function AdminSettings() {
                       />
                     </div>
                     <Button
-                      onClick={() => updateMutation.mutate()}
+                      onClick={() => updateMutation.mutate({ data: { exchangeRate: parseFloat(exchangeRate) } })}
                       disabled={updateMutation.isPending || !exchangeRate}
                     >
                       {updateMutation.isPending ? (
@@ -80,7 +86,6 @@ export default function AdminSettings() {
                 )}
               </div>
 
-              {/* Preview */}
               {exchangeRate && (
                 <div className="bg-muted/50 rounded-lg p-4">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t("admin.rate_preview")}</p>
@@ -99,7 +104,6 @@ export default function AdminSettings() {
             </div>
           </div>
 
-          {/* Info Card */}
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
             <p className="text-sm text-primary font-medium mb-1">{t("admin.settings_note_title")}</p>
             <p className="text-xs text-muted-foreground">{t("admin.settings_note_desc")}</p>

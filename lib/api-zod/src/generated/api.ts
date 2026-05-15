@@ -582,3 +582,213 @@ export const GetCustomerDashboardResponse = zod.object({
 })
 
 
+/**
+ * @summary Get public platform settings (exchange rate)
+ */
+export const GetPublicSettingsResponse = zod.object({
+  "exchangeRate": zod.number()
+})
+
+
+/**
+ * @summary Get platform-wide stats (admin only)
+ */
+export const AdminGetStatsResponse = zod.object({
+  "totalUsers": zod.number(),
+  "totalProducts": zod.number(),
+  "totalOrders": zod.number(),
+  "totalRevenue": zod.number(),
+  "ordersByStatus": zod.array(zod.object({
+  "status": zod.string(),
+  "count": zod.number()
+})),
+  "recentOrders": zod.array(zod.object({
+  "id": zod.number(),
+  "customerId": zod.number(),
+  "customerName": zod.string(),
+  "customerEmail": zod.string(),
+  "total": zod.number(),
+  "status": zod.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary List all users with pagination (admin only)
+ */
+export const AdminListUsersQueryParams = zod.object({
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const AdminListUsersResponse = zod.object({
+  "data": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['customer', 'seller', 'admin']),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number(),
+  "totalPages": zod.number()
+})
+
+
+/**
+ * @summary Delete a user and all associated data (admin only)
+ */
+export const AdminDeleteUserParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminDeleteUserResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary List all products with pagination (admin only)
+ */
+export const AdminListProductsQueryParams = zod.object({
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const AdminListProductsResponse = zod.object({
+  "data": zod.array(zod.object({
+  "id": zod.number(),
+  "sellerId": zod.number(),
+  "sellerName": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "price": zod.number(),
+  "discountPercent": zod.number().nullable(),
+  "category": zod.string(),
+  "stock": zod.number(),
+  "imageUrl": zod.string().nullable(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number(),
+  "totalPages": zod.number()
+})
+
+
+/**
+ * @summary Update a product (admin only)
+ */
+export const AdminUpdateProductParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminUpdateProductBody = zod.object({
+  "name": zod.string().optional(),
+  "description": zod.string().optional(),
+  "price": zod.number().optional(),
+  "category": zod.string().optional(),
+  "stock": zod.number().optional(),
+  "discountPercent": zod.number().nullish(),
+  "imageUrl": zod.string().nullish()
+})
+
+export const AdminUpdateProductResponse = zod.object({
+  "id": zod.number(),
+  "sellerId": zod.number(),
+  "sellerName": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "price": zod.number(),
+  "discountPercent": zod.number().nullable(),
+  "category": zod.string(),
+  "stock": zod.number(),
+  "imageUrl": zod.string().nullable(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a product (admin only)
+ */
+export const AdminDeleteProductParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminDeleteProductResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary List all orders with pagination (admin only)
+ */
+export const AdminListOrdersQueryParams = zod.object({
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const AdminListOrdersResponse = zod.object({
+  "data": zod.array(zod.object({
+  "id": zod.number(),
+  "customerId": zod.number(),
+  "customerName": zod.string(),
+  "customerEmail": zod.string(),
+  "total": zod.number(),
+  "status": zod.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
+  "shippingAddress": zod.string(),
+  "items": zod.array(zod.object({
+  "productId": zod.number(),
+  "productName": zod.string(),
+  "quantity": zod.number(),
+  "unitPrice": zod.number(),
+  "subtotal": zod.number()
+})),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number(),
+  "totalPages": zod.number()
+})
+
+
+/**
+ * @summary Update order status (admin only)
+ */
+export const AdminUpdateOrderStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminUpdateOrderStatusBody = zod.object({
+  "status": zod.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])
+})
+
+export const AdminUpdateOrderStatusResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Get admin platform settings (admin only)
+ */
+export const AdminGetSettingsResponse = zod.object({
+  "exchangeRate": zod.number()
+})
+
+
+/**
+ * @summary Update platform settings (admin only)
+ */
+export const AdminUpdateSettingsBody = zod.object({
+  "exchangeRate": zod.number()
+})
+
+export const AdminUpdateSettingsResponse = zod.object({
+  "message": zod.string()
+})
+
+

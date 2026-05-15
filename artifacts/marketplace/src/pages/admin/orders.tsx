@@ -1,7 +1,14 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/AdminLayout";
-import { adminApi, type AdminOrder } from "@/lib/adminApi";
+import {
+  useAdminListOrders,
+  useAdminUpdateOrderStatus,
+  getAdminListOrdersQueryKey,
+  getAdminGetStatsQueryKey,
+  type AdminOrder,
+  type OrderStatusUpdateStatus,
+} from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Button } from "@/components/ui/button";
@@ -32,24 +39,22 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin", "orders", page],
-    queryFn: () => adminApi.getOrders(page, PAGE_SIZE),
-  });
+  const { data, isLoading } = useAdminListOrders({ page, limit: PAGE_SIZE });
 
   const orders = data?.data ?? [];
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
 
-  const updateStatus = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) =>
-      adminApi.updateOrderStatus(id, status),
-    onSuccess: () => {
-      toast({ title: t("admin.order_updated") });
-      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+  const updateStatus = useAdminUpdateOrderStatus({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: t("admin.order_updated") });
+        queryClient.invalidateQueries({ queryKey: getAdminListOrdersQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getAdminGetStatsQueryKey() });
+      },
+      onError: (err: Error) =>
+        toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
     },
-    onError: (err: Error) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
   });
 
   const filtered = orders.filter((o: AdminOrder) => {
@@ -136,7 +141,9 @@ export default function AdminOrders() {
                     <td className="px-4 py-3">
                       <Select
                         value={order.status}
-                        onValueChange={(status) => updateStatus.mutate({ id: order.id, status })}
+                        onValueChange={(status) =>
+                          updateStatus.mutate({ id: order.id, data: { status: status as OrderStatusUpdateStatus } })
+                        }
                       >
                         <SelectTrigger className={`h-7 text-xs w-36 font-semibold border-0 ${STATUS_COLORS[order.status] ?? ""}`}>
                           <SelectValue />

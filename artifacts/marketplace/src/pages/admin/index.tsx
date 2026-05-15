@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/AdminLayout";
-import { adminApi } from "@/lib/adminApi";
+import { useAdminGetStats } from "@workspace/api-client-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +17,7 @@ export default function AdminDashboard() {
   const { t } = useTranslation();
   const { format } = useCurrency();
 
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ["admin", "stats"],
-    queryFn: () => adminApi.getStats(),
-  });
+  const { data: stats, isLoading } = useAdminGetStats();
 
   const statCards = [
     { label: t("admin.total_users"), value: stats?.totalUsers ?? 0, icon: Users, color: "text-blue-500" },
@@ -38,7 +34,6 @@ export default function AdminDashboard() {
           <p className="text-muted-foreground mt-1">{t("admin.dashboard_desc")}</p>
         </div>
 
-        {/* Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statCards.map(({ label, value, icon: Icon, color }) => (
             <div key={label} className="bg-card border border-border rounded-xl p-5">
@@ -58,7 +53,6 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Orders by Status */}
           <div className="bg-card border border-border rounded-xl p-5">
             <h2 className="font-semibold text-foreground mb-4">{t("admin.orders_by_status")}</h2>
             {isLoading ? (
@@ -82,7 +76,6 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          {/* Recent Orders */}
           <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5">
             <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
