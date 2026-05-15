@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Product } from "@workspace/api-client-react";
+import { Product, getProduct, getGetProductQueryKey } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useAddToCart, getGetCartQueryKey } from "@workspace/api-client-react";
@@ -48,12 +48,21 @@ export function ProductCard({ product }: ProductCardProps) {
     addToCart.mutate({ data: { productId: product.id, quantity: 1 } });
   };
 
+  const handleMouseEnter = () => {
+    queryClient.prefetchQuery({
+      queryKey: getGetProductQueryKey(product.id),
+      queryFn: () => getProduct(product.id),
+      staleTime: 2 * 60 * 1000,
+    });
+  };
+
   const hasDiscount = product.discountPercent && product.discountPercent > 0;
 
   return (
     <div
       className="group flex flex-col bg-card rounded-xl border border-border overflow-hidden hover:shadow-md hover:border-border/80 transition-all duration-200 cursor-pointer h-full relative"
       onClick={() => navigate(`/products/${product.id}`)}
+      onMouseEnter={handleMouseEnter}
       role="link"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && navigate(`/products/${product.id}`)}
@@ -69,6 +78,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <img
             src={product.imageUrl}
             alt={product.name}
+            loading="lazy"
             className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
