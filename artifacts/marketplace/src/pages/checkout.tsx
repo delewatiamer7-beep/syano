@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, CheckCircle2 } from "lucide-react";
+import { Truck, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
@@ -112,7 +112,7 @@ export default function Checkout() {
               <div className="pt-5 border-t space-y-4">
                 <h3 className="text-base font-semibold">{t("checkout.payment_details")}</h3>
                 <div className="p-4 border rounded-xl bg-muted/30 flex items-start gap-4">
-                  <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <Truck className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
                   <div>
                     <p className="font-semibold text-sm">{t("checkout.demo_gateway")}</p>
                     <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{t("checkout.demo_desc")}</p>

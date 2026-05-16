@@ -262,6 +262,13 @@ function CartScreen() {
                     multiline
                   />
                 </View>
+                <View style={[styles.codBadge, { backgroundColor: colors.accent }]}>
+                  <Ionicons name="bicycle-outline" size={15} color={colors.primary} />
+                  <Text style={[styles.codText, { color: colors.primary }]}>
+                    Cash on Delivery
+                  </Text>
+                </View>
+
                 <View style={styles.checkoutActions}>
                   <Pressable
                     style={[styles.cancelBtn, { borderColor: colors.border }]}
@@ -414,4 +421,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   placeOrderText: { fontSize: 14, fontWeight: "700" as const },
+  codBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  codText: { fontSize: 13, fontWeight: "600" as const },
 });
