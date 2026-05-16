@@ -263,7 +263,7 @@ function CartScreen() {
                   />
                 </View>
                 <View style={[styles.codBadge, { backgroundColor: colors.accent }]}>
-                  <Ionicons name="bicycle-outline" size={15} color={colors.primary} />
+                  <Ionicons name="cube-outline" size={15} color={colors.primary} />
                   <Text style={[styles.codText, { color: colors.primary }]}>
                     Cash on Delivery
                   </Text>
